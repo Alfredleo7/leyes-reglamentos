@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cuestionario</title>
+<style>
+  body {
+    font-family: Arial;
+    margin: 20px;
+    background: #f4f6f8;
+  }
+
+  h1 {
+    text-align: center;
+  }
+
+  .question {
+    background: white;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .correct {
+    background-color: #d4edda;
+  }
+
+  .incorrect {
+    background-color: #f8d7da;
+  }
+
+  button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  #resultado {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<h1>Mecánica Básica</h1>
+
+<form id="quizForm"></form>
+
+<button onclick="evaluar()">Evaluar</button>
+
+<div id="resultado"></div>
+
+<script>
+// 🔹 JSON de preguntas
+const preguntas = [
+  {
+    "id": 1,
+    "texto": "1. ¿Qué tipo de mantenimiento se realiza antes de que ocurra una falla?",
+    "opciones": [
+      { "texto": "A) Correctivo", "correcta": false },
+      { "texto": "B) Predictivo", "correcta": false },
+      { "texto": "C) Preventivo", "correcta": true },
+      { "texto": "D) Reconstructivo", "correcta": false }
+    ]
+  },
+  {
+    "id": 2,
+    "texto": "2. ¿Cuál de los siguientes no es un componente móvil del motor?",
+    "opciones": [
+      { "texto": "A) Pistón", "correcta": false },
+      { "texto": "B) Cigüeñal", "correcta": false },
+      { "texto": "C) Bloque del motor", "correcta": true },
+      { "texto": "D) Biela", "correcta": false }
+    ]
+  },
+  {
+    "id": 3,
+    "texto": "3. ¿Cuál es la herramienta usada comúnmente para medir el ajuste entre piezas móviles?",
+    "opciones": [
+      { "texto": "A) Llave fija", "correcta": false },
+      { "texto": "B) Calibrador de espesores", "correcta": true },
+      { "texto": "C) Martillo", "correcta": false },
+      { "texto": "D) Destornillador", "correcta": false }
+    ]
+  },
+  {
+    "id": 4,
+    "texto": "4. El motor a gasolina se diferencia del diésel por:",
+    "opciones": [
+      { "texto": "A) Uso de bujías para la combustión", "correcta": true },
+      { "texto": "B) Mayor compresión", "correcta": false },
+      { "texto": "C) Uso exclusivo de aire", "correcta": false },
+      { "texto": "D) Inyección directa únicamente", "correcta": false }
+    ]
+  },
+  {
+    "id": 5,
+    "texto": "5. ¿Cuál es la función del cigüeñal?",
+    "opciones": [
+      { "texto": "A) Enfriar el motor", "correcta": false },
+      { "texto": "B) Encender el sistema eléctrico", "correcta": false },
+      { "texto": "C) Transformar el movimiento lineal en rotatorio", "correcta": true },
+      { "texto": "D) Inyectar combustible", "correcta": false }
+    ]
+  },
+  {
+    "id": 6,
+    "texto": "6. El ciclo de cuatro tiempos no incluye:",
+    "opciones": [
+      { "texto": "A) Admisión", "correcta": false },
+      { "texto": "B) Compresión", "correcta": false },
+      { "texto": "C) Refrigeración", "correcta": true },
+      { "texto": "D) Escape", "correcta": false }
+    ]
+  },
+  {
+    "id": 7,
+    "texto": "7. Los motores en V se caracterizan por:",
+    "opciones": [
+      { "texto": "A) Disposición en línea", "correcta": false },
+      { "texto": "B) Pistones enfrentados horizontalmente", "correcta": false },
+      { "texto": "C) Cilindros inclinados en forma de V", "correcta": true },
+      { "texto": "D) Sólo para motores diésel", "correcta": false }
+    ]
+  },
+  {
+    "id": 8,
+    "texto": "8. El mantenimiento correctivo se realiza:",
+    "opciones": [
+      { "texto": "A) Antes de una falla", "correcta": false },
+      { "texto": "B) Durante la garantía", "correcta": false },
+      { "texto": "C) Después de una falla", "correcta": true },
+      { "texto": "D) Nunca", "correcta": false }
+    ]
+  },
+  {
+    "id": 9,
+    "texto": "9. ¿Qué componente del motor sujeta los cilindros y otras piezas fijas?",
+    "opciones": [
+      { "texto": "A) Cigüeñal", "correcta": false },
+      { "texto": "B) Árbol de levas", "correcta": false },
+      { "texto": "C) Culata", "correcta": false },
+      { "texto": "D) Bloque del motor", "correcta": true }
+    ]
+  },
+  {
+    "id": 10,
+    "texto": "10. Una avería común en el sistema de lubricación puede ser:",
+    "opciones": [
+      { "texto": "A) Ruido en los frenos", "correcta": false },
+      { "texto": "B) Sobrecalentamiento de bujías", "correcta": false },
+      { "texto": "C) Baja presión de aceite", "correcta": true },
+      { "texto": "D) Fallo del embrague", "correcta": false }
+    ]
+  },
+  {
+    "id": 11,
+    "texto": "11. ¿Qué tipo de motor no utiliza bujías?",
+    "opciones": [
+      { "texto": "A) Motor a gasolina", "correcta": false },
+      { "texto": "B) Motor eléctrico", "correcta": false },
+      { "texto": "C) Motor diésel", "correcta": true },
+      { "texto": "D) Motor híbrido", "correcta": false }
+    ]
+  },
+  {
+    "id": 12,
+    "texto": "12. ¿Qué indica una falla en la compresión del motor?",
+    "opciones": [
+      { "texto": "A) Exceso de combustible", "correcta": false },
+      { "texto": "B) Pérdida de potencia", "correcta": true },
+      { "texto": "C) Alta presión del aceite", "correcta": false },
+      { "texto": "D) Encendido rápido", "correcta": false }
+    ]
+  },
+  {
+    "id": 13,
+    "texto": "13. ¿Qué elemento transmite movimiento al árbol de levas?",
+    "opciones": [
+      { "texto": "A) Bujía", "correcta": false },
+      { "texto": "B) Banda o cadena de distribución", "correcta": true },
+      { "texto": "C) Pistón", "correcta": false },
+      { "texto": "D) Válvula", "correcta": false }
+    ]
+  },
+  {
+    "id": 14,
+    "texto": "14. El árbol de levas sirve para:",
+    "opciones": [
+      { "texto": "A) Girar las ruedas", "correcta": false },
+      { "texto": "B) Regular la mezcla de combustible", "correcta": false },
+      { "texto": "C) Abrir y cerrar válvulas", "correcta": true },
+      { "texto": "D) Medir la presión de aceite", "correcta": false }
+    ]
+  },
+  {
+    "id": 15,
+    "texto": "15. ¿Qué herramienta se utiliza para diagnosticar el funcionamiento del motor?",
+    "opciones": [
+      { "texto": "A) Escáner automotriz", "correcta": true },
+      { "texto": "B) Lijadora", "correcta": false },
+      { "texto": "C) Cepillo de acero", "correcta": false },
+      { "texto": "D) Pinzas de freno", "correcta": false }
+    ]
+  },
+  {
+    "id": 16,
+    "texto": "16. ¿Cuál es la función del sistema de alimentación?",
+    "opciones": [
+      { "texto": "A) Refrigerar el motor", "correcta": false },
+      { "texto": "B) Lubricar componentes", "correcta": false },
+      { "texto": "C) Suministrar mezcla aire-combustible", "correcta": true },
+      { "texto": "D) Encender el motor", "correcta": false }
+    ]
+  },
+  {
+    "id": 17,
+    "texto": "17. El sistema de inyección multipunto:",
+    "opciones": [
+      { "texto": "A) Alimenta un solo cilindro", "correcta": false },
+      { "texto": "B) Tiene un inyector por cilindro", "correcta": true },
+      { "texto": "C) Usa carburador", "correcta": false },
+      { "texto": "D) Solo funciona con diésel", "correcta": false }
+    ]
+  },
+  {
+    "id": 18,
+    "texto": "18. ¿Qué característica tiene el sistema de alimentación con carburador?",
+    "opciones": [
+      { "texto": "A) Inyección electrónica", "correcta": false },
+      { "texto": "B) Control por computadora", "correcta": false },
+      { "texto": "C) Mezcla aire-combustible previa a la entrada del cilindro", "correcta": true },
+      { "texto": "D) Combustión por chispa controlada", "correcta": false }
+    ]
+  },
+  {
+    "id": 19,
+    "texto": "19. La inyección diésel se diferencia por:",
+    "opciones": [
+      { "texto": "A) Usar bujías", "correcta": false },
+      { "texto": "B) Inyectar a baja presión", "correcta": false },
+      { "texto": "C) Inyectar directamente en la cámara de combustión", "correcta": true },
+      { "texto": "D) Utilizar solo un carburador", "correcta": false }
+    ]
+  },
+  {
+    "id": 20,
+    "texto": "20. ¿Qué tipo de mezcla mejora el rendimiento?",
+    "opciones": [
+      { "texto": "A) Rica", "correcta": true },
+      { "texto": "B) Pobre", "correcta": false },
+      { "texto": "C) Aire pura", "correcta": false },
+      { "texto": "D) Aceite-combustible", "correcta": false }
+    ]
+  },
+  {
+    "id": 21,
+    "texto": "21. ¿Qué sistema permite el encendido del motor?",
+    "opciones": [
+      { "texto": "A) Lubricación", "correcta": false },
+      { "texto": "B) Alimentación", "correcta": false },
+      { "texto": "C) Eléctrico", "correcta": true },
+      { "texto": "D) Refrigeración", "correcta": false }
+    ]
+  },
+  {
+    "id": 22,
+    "texto": "22. ¿Cuál es la función del sistema de carga?",
+    "opciones": [
+      { "texto": "A) Arrancar el motor", "correcta": false },
+      { "texto": "B) Suministrar aire", "correcta": false },
+      { "texto": "C) Generar energía eléctrica para recargar la batería", "correcta": true },
+      { "texto": "D) Inyectar combustible", "correcta": false }
+    ]
+  },
+  {
+    "id": 23,
+    "texto": "23. En un circuito de encendido, ¿cuál componente produce la chispa?",
+    "opciones": [
+      { "texto": "A) Alternador", "correcta": false },
+      { "texto": "B) Bujía", "correcta": true },
+      { "texto": "C) Batería", "correcta": false },
+      { "texto": "D) Motor de arranque", "correcta": false }
+    ]
+  },
+  {
+    "id": 24,
+    "texto": "24. La conexión de baterías en serie produce:",
+    "opciones": [
+      { "texto": "A) Aumento de capacidad (Ah)", "correcta": false },
+      { "texto": "B) Aumento de voltaje", "correcta": true },
+      { "texto": "C) Reducción de voltaje", "correcta": false },
+      { "texto": "D) Encendido inmediato", "correcta": false }
+    ]
+  },
+  {
+    "id": 25,
+    "texto": "25. ¿Qué componente se encarga de iniciar el giro del motor?",
+    "opciones": [
+      { "texto": "A) Batería", "correcta": false },
+      { "texto": "B) Alternador", "correcta": false },
+      { "texto": "C) Motor de arranque", "correcta": true },
+      { "texto": "D) Fusible", "correcta": false }
+    ]
+  },
+  {
+    "id": 26,
+    "texto": "26. Un síntoma de batería defectuosa es:",
+    "opciones": [
+      { "texto": "A) Exceso de ruido", "correcta": false },
+      { "texto": "B) Arranque lento", "correcta": true },
+      { "texto": "C) Aire contaminado", "correcta": false },
+      { "texto": "D) Sobrecalentamiento del motor", "correcta": false }
+    ]
+  },
+  {
+    "id": 27,
+    "texto": "27. El aceite de motor debe cambiarse según:",
+    "opciones": [
+      { "texto": "A) Estilo de conducción", "correcta": false },
+      { "texto": "B) Kilometraje o tiempo de uso", "correcta": true },
+      { "texto": "C) Color del aceite", "correcta": false },
+      { "texto": "D) Nivel de refrigerante", "correcta": false }
+    ]
+  },
+  {
+    "id": 28,
+    "texto": "28. ¿Qué causa más común tiene la falla en el sistema de lubricación?",
+    "opciones": [
+      { "texto": "A) Alta velocidad", "correcta": false },
+      { "texto": "B) Uso de bujías incorrectas", "correcta": false },
+      { "texto": "C) Falta de mantenimiento", "correcta": true },
+      { "texto": "D) Exceso de agua", "correcta": false }
+    ]
+  },
+  {
+    "id": 29,
+    "texto": "29. ¿Qué sistema previene el sobrecalentamiento del motor?",
+    "opciones": [
+      { "texto": "A) Encendido", "correcta": false },
+      { "texto": "B) Refrigeración", "correcta": true },
+      { "texto": "C) Alimentación", "correcta": false },
+      { "texto": "D) Eléctrico", "correcta": false }
+    ]
+  },
+  {
+    "id": 30,
+    "texto": "30. ¿Qué característica tiene el líquido refrigerante?",
+    "opciones": [
+      { "texto": "A) Conductividad eléctrica", "correcta": false },
+      { "texto": "B) Alta densidad", "correcta": false },
+      { "texto": "C) Propiedad anticongelante", "correcta": true },
+      { "texto": "D) Viscosidad elevada", "correcta": false }
+    ]
+  },
+  {
+    "id": 31,
+    "texto": "31. El termostato regula:",
+    "opciones": [
+      { "texto": "A) La presión del aceite", "correcta": false },
+      { "texto": "B) La mezcla aire-combustible", "correcta": false },
+      { "texto": "C) La temperatura del motor", "correcta": true },
+      { "texto": "D) El número de revoluciones", "correcta": false }
+    ]
+  },
+  {
+    "id": 32,
+    "texto": "32. ¿Qué elemento pertenece al sistema eléctrico?",
+    "opciones": [
+      { "texto": "A) Cigüeñal", "correcta": false },
+      { "texto": "B) Radiador", "correcta": false },
+      { "texto": "C) Alternador", "correcta": true },
+      { "texto": "D) Árbol de levas", "correcta": false }
+    ]
+  },
+  {
+    "id": 33,
+    "texto": "33. ¿Qué avería es común en el sistema de refrigeración?",
+    "opciones": [
+      { "texto": "A) Rotura de la correa", "correcta": false },
+      { "texto": "B) Fuga de líquido", "correcta": true },
+      { "texto": "C) Cortocircuito", "correcta": false },
+      { "texto": "D) Falla de la bujía", "correcta": false }
+    ]
+  },
+  {
+    "id": 34,
+    "texto": "34. El alternador tiene como misión:",
+    "opciones": [
+      { "texto": "A) Convertir energía mecánica en eléctrica", "correcta": true },
+      { "texto": "B) Refrigerar el motor", "correcta": false },
+      { "texto": "C) Mezclar el combustible", "correcta": false },
+      { "texto": "D) Comprimir el aire", "correcta": false }
+    ]
+  },
+  {
+    "id": 35,
+    "texto": "35. ¿Qué ocurre si el aceite está en mal estado?",
+    "opciones": [
+      { "texto": "A) El motor consume más refrigerante", "correcta": false },
+      { "texto": "B) Se reduce la eficiencia del sistema eléctrico", "correcta": false },
+      { "texto": "C) Aumenta el desgaste de piezas móviles", "correcta": true },
+      { "texto": "D) Mejora el rendimiento", "correcta": false }
+    ]
+  },
+  {
+    "id": 36,
+    "texto": "36. ¿Qué causa una mezcla pobre?",
+    "opciones": [
+      { "texto": "A) Más combustible del necesario", "correcta": false },
+      { "texto": "B) Menor cantidad de aire", "correcta": false },
+      { "texto": "C) Mayor cantidad de aire respecto al combustible", "correcta": true },
+      { "texto": "D) Falla del lubricante", "correcta": false }
+    ]
+  },
+  {
+    "id": 37,
+    "texto": "37. ¿Qué elemento detecta la temperatura en el sistema eléctrico?",
+    "opciones": [
+      { "texto": "A) Sensor térmico", "correcta": true },
+      { "texto": "B) Fusible", "correcta": false },
+      { "texto": "C) Relé", "correcta": false },
+      { "texto": "D) Motor de arranque", "correcta": false }
+    ]
+  },
+  {
+    "id": 38,
+    "texto": "38. ¿Cuál es una ventaja de la inyección electrónica sobre el carburador?",
+    "opciones": [
+      { "texto": "A) Menor precisión en la mezcla", "correcta": false },
+      { "texto": "B) Mayor consumo", "correcta": false },
+      { "texto": "C) Mejor rendimiento y control", "correcta": true },
+      { "texto": "D) Menor costo de mantenimiento", "correcta": false }
+    ]
+  },
+  {
+    "id": 39,
+    "texto": "39. La batería debe mantenerse:",
+    "opciones": [
+      { "texto": "A) Siempre descargada", "correcta": false },
+      { "texto": "B) Con sus bornes sucios", "correcta": false },
+      { "texto": "C) Con niveles de electrolito adecuados", "correcta": true },
+      { "texto": "D) Sin uso prolongado", "correcta": false }
+    ]
+  },
+  {
+    "id": 40,
+    "texto": "40. ¿Qué es necesario revisar para un buen arranque del vehículo?",
+    "opciones": [
+      { "texto": "A) Neumáticos", "correcta": false },
+      { "texto": "B) Líquido refrigerante", "correcta": false },
+      { "texto": "C) Carga de batería", "correcta": true },
+      { "texto": "D) Estado de pintura", "correcta": false }
+    ]
+  }
+]
+
+
+// 🔹 función para mezclar (shuffle)
+function mezclar(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+// 🔹 render preguntas
+const form = document.getElementById("quizForm");
+
+preguntas.forEach((p, i) => {
+  const div = document.createElement("div");
+  div.className = "question";
+  div.id = "q" + i;
+
+  // mezclar opciones
+  const opcionesMezcladas = mezclar([...p.opciones]);
+
+  let html = `<p>${p.texto}</p>`;
+
+  opcionesMezcladas.forEach((op, j) => {
+    html += `
+      <label>
+        <input type="radio" name="q${i}" value="${op.correcta}">
+        ${op.texto}
+      </label><br>
+    `;
+  });
+
+  div.innerHTML = html;
+  form.appendChild(div);
+});
+
+// 🔹 evaluar
+function evaluar() {
+  let correctas = 0;
+
+  preguntas.forEach((p, i) => {
+    const seleccion = document.querySelector(`input[name="q${i}"]:checked`);
+    const div = document.getElementById("q" + i);
+
+    div.classList.remove("correct", "incorrect");
+
+    if (seleccion) {
+      if (seleccion.value === "true") {
+        div.classList.add("correct");
+        correctas++;
+      } else {
+        div.classList.add("incorrect");
+      }
+    } else {
+      div.classList.add("incorrect");
+    }
+  });
+
+  document.getElementById("resultado").innerText =
+    `Resultado: ${correctas} / ${preguntas.length}`;
+}
+</script>
+
+</body>
+</html>

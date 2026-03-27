@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cuestionario</title>
+<style>
+  body {
+    font-family: Arial;
+    margin: 20px;
+    background: #f4f6f8;
+  }
+
+  h1 {
+    text-align: center;
+  }
+
+  .question {
+    background: white;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .correct {
+    background-color: #d4edda;
+  }
+
+  .incorrect {
+    background-color: #f8d7da;
+  }
+
+  button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  #resultado {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<h1>Computación</h1>
+
+<form id="quizForm"></form>
+
+<button onclick="evaluar()">Evaluar</button>
+
+<div id="resultado"></div>
+
+<script>
+// 🔹 JSON de preguntas
+const preguntas = [
+  {
+    "id": 1,
+    "texto": "1. ¿Qué es un computador?",
+    "opciones": [
+      { "texto": "a) Un dispositivo para cocinar alimentos", "correcta": false },
+      { "texto": "b) Una máquina electrónica que procesa información", "correcta": true },
+      { "texto": "c) Un tipo de vehículo", "correcta": false },
+      { "texto": "d) Un programa de internet", "correcta": false }
+    ]
+  },
+  {
+    "id": 2,
+    "texto": "2. ¿Cuál de los siguientes es un dispositivo de entrada?",
+    "opciones": [
+      { "texto": "a) Monitor", "correcta": false },
+      { "texto": "b) Impresora", "correcta": false },
+      { "texto": "c) Teclado", "correcta": true },
+      { "texto": "d) Parlantes", "correcta": false }
+    ]
+  },
+  {
+    "id": 3,
+    "texto": "3. ¿Cuál es un dispositivo de salida?",
+    "opciones": [
+      { "texto": "a) Mouse", "correcta": false },
+      { "texto": "b) Teclado", "correcta": false },
+      { "texto": "c) Escáner", "correcta": false },
+      { "texto": "d) Monitor", "correcta": true }
+    ]
+  },
+  {
+    "id": 4,
+    "texto": "4. ¿Qué es el hardware?",
+    "opciones": [
+      { "texto": "a) Los programas del computador", "correcta": false },
+      { "texto": "b) Las partes físicas del computador", "correcta": true },
+      { "texto": "c) El internet", "correcta": false },
+      { "texto": "d) Un virus", "correcta": false }
+    ]
+  },
+  {
+    "id": 5,
+    "texto": "5. ¿Qué es el software?",
+    "opciones": [
+      { "texto": "a) Los cables del computador", "correcta": false },
+      { "texto": "b) Los dispositivos físicos", "correcta": false },
+      { "texto": "c) Los programas y aplicaciones", "correcta": true },
+      { "texto": "d) El teclado", "correcta": false }
+    ]
+  },
+  {
+    "id": 6,
+    "texto": "6. ¿Cuál de estos es un sistema operativo?",
+    "opciones": [
+      { "texto": "a) Word", "correcta": false },
+      { "texto": "b) Excel", "correcta": false },
+      { "texto": "c) Windows", "correcta": true },
+      { "texto": "d) PowerPoint", "correcta": false }
+    ]
+  },
+  {
+    "id": 7,
+    "texto": "7. ¿Para qué sirve el sistema operativo?",
+    "opciones": [
+      { "texto": "a) Para dibujar", "correcta": false },
+      { "texto": "b) Para controlar y administrar el computador", "correcta": true },
+      { "texto": "c) Para navegar en internet", "correcta": false },
+      { "texto": "d) Para imprimir", "correcta": false }
+    ]
+  },
+  {
+    "id": 8,
+    "texto": "8. ¿Qué es el escritorio en Windows?",
+    "opciones": [
+      { "texto": "a) Un mueble para poner el computador", "correcta": false },
+      { "texto": "b) El área principal que aparece al encender el computador", "correcta": true },
+      { "texto": "c) Una carpeta de archivos", "correcta": false },
+      { "texto": "d) Un programa de dibujo", "correcta": false }
+    ]
+  },
+  {
+    "id": 9,
+    "texto": "9. ¿Cómo se llama el botón que permite acceder a los programas en Windows?",
+    "opciones": [
+      { "texto": "a) Botón de salida", "correcta": false },
+      { "texto": "b) Botón de inicio", "correcta": true },
+      { "texto": "c) Botón de apagado", "correcta": false },
+      { "texto": "d) Botón de internet", "correcta": false }
+    ]
+  },
+  {
+    "id": 10,
+    "texto": "10. ¿Qué es una carpeta?",
+    "opciones": [
+      { "texto": "a) Un programa de música", "correcta": false },
+      { "texto": "b) Un lugar para organizar y guardar archivos", "correcta": true },
+      { "texto": "c) Un dispositivo físico", "correcta": false },
+      { "texto": "d) Una página web", "correcta": false }
+    ]
+  },
+  {
+    "id": 11,
+    "texto": "11. ¿Cuál es la función principal de Microsoft Word?",
+    "opciones": [
+      { "texto": "a) Hacer cálculos matemáticos", "correcta": false },
+      { "texto": "b) Crear y editar documentos de texto", "correcta": true },
+      { "texto": "c) Editar videos", "correcta": false },
+      { "texto": "d) Navegar por internet", "correcta": false }
+    ]
+  },
+  {
+    "id": 12,
+    "texto": "12. ¿Cuál es la extensión común de un archivo de Word?",
+    "opciones": [
+      { "texto": "a) .docx", "correcta": true },
+      { "texto": "b) .xlsx", "correcta": false },
+      { "texto": "c) .pptx", "correcta": false },
+      { "texto": "d) .jpg", "correcta": false }
+    ]
+  },
+  {
+    "id": 13,
+    "texto": "13. ¿Qué herramienta se usa para cambiar el tipo de letra en Word?",
+    "opciones": [
+      { "texto": "a) Párrafo", "correcta": false },
+      { "texto": "b) Fuente", "correcta": true },
+      { "texto": "c) Portapapeles", "correcta": false },
+      { "texto": "d) Insertar", "correcta": false }
+    ]
+  },
+  {
+    "id": 14,
+    "texto": "14. ¿Cómo se puede poner el texto en negrita en Word?",
+    "opciones": [
+      { "texto": "a) Ctrl + N", "correcta": true },
+      { "texto": "b) Ctrl + K", "correcta": false },
+      { "texto": "c) Ctrl + S", "correcta": false },
+      { "texto": "d) Ctrl + P", "correcta": false }
+    ]
+  },
+  {
+    "id": 15,
+    "texto": "15. ¿Qué es Microsoft Excel?",
+    "opciones": [
+      { "texto": "a) Un programa para escribir cartas", "correcta": false },
+      { "texto": "b) Una hoja de cálculo para realizar operaciones matemáticas", "correcta": true },
+      { "texto": "c) Un programa para ver películas", "correcta": false },
+      { "texto": "d) Un editor de fotos", "correcta": false }
+    ]
+  },
+  {
+    "id": 16,
+    "texto": "16. ¿Cómo se llama la intersección de una fila y una columna en Excel?",
+    "opciones": [
+      { "texto": "a) Cuadro", "correcta": false },
+      { "texto": "b) Celda", "correcta": true },
+      { "texto": "c) Línea", "correcta": false },
+      { "texto": "d) Punto", "correcta": false }
+    ]
+  },
+  {
+    "id": 17,
+    "texto": "17. ¿Qué símbolo se usa para iniciar una fórmula en Excel?",
+    "opciones": [
+      { "texto": "a) #", "correcta": false },
+      { "texto": "b) =", "correcta": true },
+      { "texto": "c) +", "correcta": false },
+      { "texto": "d) $", "correcta": false }
+    ]
+  },
+  {
+    "id": 18,
+    "texto": "18. ¿Para qué sirve Microsoft PowerPoint?",
+    "opciones": [
+      { "texto": "a) Para crear bases de datos", "correcta": false },
+      { "texto": "b) Para crear presentaciones visuales", "correcta": true },
+      { "texto": "c) Para editar música", "correcta": false },
+      { "texto": "d) Para navegar en internet", "correcta": false }
+    ]
+  },
+  {
+    "id": 19,
+    "texto": "19. ¿Cómo se llama cada una de las páginas en PowerPoint?",
+    "opciones": [
+      { "texto": "a) Hojas", "correcta": false },
+      { "texto": "b) Diapositivas", "correcta": true },
+      { "texto": "c) Archivos", "correcta": false },
+      { "texto": "d) Documentos", "correcta": false }
+    ]
+  },
+  {
+    "id": 20,
+    "texto": "20. ¿Qué es el internet?",
+    "opciones": [
+      { "texto": "a) Un programa de computador", "correcta": false },
+      { "texto": "b) Una red global de computadores conectados", "correcta": true },
+      { "texto": "c) Un virus informático", "correcta": false },
+      { "texto": "d) Una marca de computador", "correcta": false }
+    ]
+  },
+  {
+    "id": 21,
+    "texto": "21. ¿Qué es un navegador web?",
+    "opciones": [
+      { "texto": "a) Un programa para escribir textos", "correcta": false },
+      { "texto": "b) Una aplicación para navegar por internet (ej. Google Chrome)", "correcta": true },
+      { "texto": "c) Un tipo de computador", "correcta": false },
+      { "texto": "d) Un dispositivo físico", "correcta": false }
+    ]
+  },
+  {
+    "id": 22,
+    "texto": "22. ¿Cuál de los siguientes es un buscador de internet?",
+    "opciones": [
+      { "texto": "a) Word", "correcta": false },
+      { "texto": "b) Excel", "correcta": false },
+      { "texto": "c) Google", "correcta": true },
+      { "texto": "d) Windows", "correcta": false }
+    ]
+  },
+  {
+    "id": 23,
+    "texto": "23. ¿Para qué sirve el correo electrónico?",
+    "opciones": [
+      { "texto": "a) Para imprimir fotos", "correcta": false },
+      { "texto": "b) Para enviar y recibir mensajes a través de internet", "correcta": true },
+      { "texto": "c) Para apagar el computador", "correcta": false },
+      { "texto": "d) Para jugar en línea", "correcta": false }
+    ]
+  },
+  {
+    "id": 24,
+    "texto": "24. ¿Qué es el almacenamiento en la nube?",
+    "opciones": [
+      { "texto": "a) Guardar archivos en un disco duro externo", "correcta": false },
+      { "texto": "b) Guardar archivos en servidores remotos a través de internet", "correcta": true },
+      { "texto": "c) Guardar archivos en un disquete", "correcta": false },
+      { "texto": "d) Imprimir los archivos", "correcta": false }
+    ]
+  },
+  {
+    "id": 25,
+    "texto": "25. ¿Qué es un virus informático?",
+    "opciones": [
+      { "texto": "a) Una parte física del computador", "correcta": false },
+      { "texto": "b) Un programa malicioso que daña el computador", "correcta": true },
+      { "texto": "c) Un programa para mejorar el rendimiento", "correcta": false },
+      { "texto": "d) Un tipo de teclado", "correcta": false }
+    ]
+  },
+  {
+    "id": 26,
+    "texto": "26. ¿Cómo podemos proteger el computador de los virus?",
+    "opciones": [
+      { "texto": "a) Apagándolo todas las noches", "correcta": false },
+      { "texto": "b) Instalando un antivirus", "correcta": true },
+      { "texto": "c) No conectando el computador a la corriente", "correcta": false },
+      { "texto": "d) Limpiando el monitor", "correcta": false }
+    ]
+  },
+  {
+    "id": 27,
+    "texto": "27. ¿Qué es una contraseña?",
+    "opciones": [
+      { "texto": "a) Un nombre de usuario", "correcta": false },
+      { "texto": "b) Una clave secreta para proteger el acceso a información", "correcta": true },
+      { "texto": "c) Un tipo de carpeta", "correcta": false },
+      { "texto": "d) Una página web", "correcta": false }
+    ]
+  },
+  {
+    "id": 28,
+    "texto": "28. ¿Qué es el spam?",
+    "opciones": [
+      { "texto": "a) Un programa de dibujo", "correcta": false },
+      { "texto": "b) Correo electrónico no deseado o basura", "correcta": true },
+      { "texto": "c) Un dispositivo de salida", "correcta": false },
+      { "texto": "d) Una carpeta de Windows", "correcta": false }
+    ]
+  },
+  {
+    "id": 29,
+    "texto": "29. ¿Qué significa la sigla WWW?",
+    "opciones": [
+      { "texto": "a) World Wide Web", "correcta": true },
+      { "texto": "b) Word Wide Wait", "correcta": false },
+      { "texto": "c) World Web Word", "correcta": false },
+      { "texto": "d) Western World Web", "correcta": false }
+    ]
+  },
+  {
+    "id": 30,
+    "texto": "30. ¿Cuál de los siguientes es un puerto para conectar dispositivos externos?",
+    "opciones": [
+      { "texto": "a) CPU", "correcta": false },
+      { "texto": "b) RAM", "correcta": false },
+      { "texto": "c) USB", "correcta": true },
+      { "texto": "d) Disco Duro", "correcta": false }
+    ]
+  },
+  {
+    "id": 31,
+    "texto": "31. ¿Qué es una red Wi-Fi?",
+    "opciones": [
+      { "texto": "a) Una conexión por cable", "correcta": false },
+      { "texto": "b) Una tecnología de conexión inalámbrica a internet", "correcta": true },
+      { "texto": "c) Un programa de computador", "correcta": false },
+      { "texto": "d) Un tipo de impresora", "correcta": false }
+    ]
+  },
+  {
+    "id": 32,
+    "texto": "32. ¿Qué es el mouse?",
+    "opciones": [
+      { "texto": "a) Un dispositivo para ingresar texto", "correcta": false },
+      { "texto": "b) Un dispositivo apuntador para manejar el cursor", "correcta": true },
+      { "texto": "c) Una pantalla táctil", "correcta": false },
+      { "texto": "d) Un dispositivo de salida de sonido", "correcta": false }
+    ]
+  },
+  {
+    "id": 33,
+    "texto": "33. ¿Qué es un archivo PDF?",
+    "opciones": [
+      { "texto": "a) Un archivo de solo imagen", "correcta": false },
+      { "texto": "b) Un formato de documento portátil que mantiene su diseño", "correcta": true },
+      { "texto": "c) Un archivo de música", "correcta": false },
+      { "texto": "d) Una hoja de cálculo", "correcta": false }
+    ]
+  },
+  {
+    "id": 34,
+    "texto": "34. ¿Para qué sirve la tecla Enter?",
+    "opciones": [
+      { "texto": "a) Para borrar texto", "correcta": false },
+      { "texto": "b) Para confirmar una acción o bajar de línea", "correcta": true },
+      { "texto": "c) Para cerrar un programa", "correcta": false },
+      { "texto": "d) Para apagar el monitor", "correcta": false }
+    ]
+  },
+  {
+    "id": 35,
+    "texto": "35. ¿Cómo se llama la parte del computador que procesa la información?",
+    "opciones": [
+      { "texto": "a) Monitor", "correcta": false },
+      { "texto": "b) CPU (Unidad Central de Procesamiento)", "correcta": true },
+      { "texto": "c) Teclado", "correcta": false },
+      { "texto": "d) Mouse", "correcta": false }
+    ]
+  },
+  {
+    "id": 36,
+    "texto": "36. ¿Qué es una red social?",
+    "opciones": [
+      { "texto": "a) Un sistema operativo", "correcta": false },
+      { "texto": "b) Plataformas digitales para conectar personas e información", "correcta": true },
+      { "texto": "c) Un virus de internet", "correcta": false },
+      { "texto": "d) Una marca de computador", "correcta": false }
+    ]
+  },
+  {
+    "id": 37,
+    "texto": "37. ¿Qué es una videollamada?",
+    "opciones": [
+      { "texto": "a) Una llamada solo de audio", "correcta": false },
+      { "texto": "b) Una comunicación en tiempo real con audio y video", "correcta": true },
+      { "texto": "c) Un mensaje de texto grabado", "correcta": false },
+      { "texto": "d) Un correo electrónico con video", "correcta": false }
+    ]
+  },
+  {
+    "id": 38,
+    "texto": "38. ¿Qué significa descargar un archivo?",
+    "opciones": [
+      { "texto": "a) Borrar un archivo del computador", "correcta": false },
+      { "texto": "b) Copiar un archivo de internet a tu computador", "correcta": true },
+      { "texto": "c) Enviar un archivo por correo", "correcta": false },
+      { "texto": "d) Imprimir un documento", "correcta": false }
+    ]
+  },
+  {
+    "id": 39,
+    "texto": "39. ¿Qué significa subir un archivo?",
+    "opciones": [
+      { "texto": "a) Copiar un archivo de tu computador a internet", "correcta": true },
+      { "texto": "b) Borrar un archivo de internet", "correcta": false },
+      { "texto": "c) Mover un archivo a una carpeta superior", "correcta": false },
+      { "texto": "d) Apagar el computador", "correcta": false }
+    ]
+  },
+  {
+    "id": 40,
+    "texto": "40. ¿Qué es un enlace o link?",
+    "opciones": [
+      { "texto": "a) Un tipo de computador", "correcta": false },
+      { "texto": "b) Un texto o imagen que al hacer clic te lleva a otro sitio web", "correcta": true },
+      { "texto": "c) Un programa para editar imágenes", "correcta": false },
+      { "texto": "d) Un método de pago en línea", "correcta": false }
+    ]
+  },
+  {
+    "id": 41,
+    "texto": "41. ¿Cuál es la diferencia principal entre un navegador y un buscador?",
+    "opciones": [
+      { "texto": "a) No hay diferencia, son lo mismo.", "correcta": false },
+      { "texto": "b) El navegador te permite ver sitios web, el buscador te ayuda a encontrarlos.", "correcta": true },
+      { "texto": "c) El navegador se usa para el correo electrónico, el buscador para redes sociales.", "correcta": false },
+      { "texto": "d) El navegador es para descargar archivos, el buscador para subirlos.", "correcta": false }
+    ]
+  },
+  {
+    "id": 42,
+    "texto": "42. Al recibir un correo electrónico sospechoso con un enlace, ¿cuál es la recomendación más segura?",
+    "opciones": [
+      { "texto": "a) Hacer clic en el enlace inmediatamente para ver de qué se trata.", "correcta": false },
+      { "texto": "b) Copiar el enlace y pegarlo en un buscador para verificar su origen.", "correcta": false },
+      { "texto": "c) Ignorar el correo electrónico y no hacer clic en ningún enlace.", "correcta": true },
+      { "texto": "d) Responder al correo solicitando más información.", "correcta": false }
+    ]
+  }
+]
+
+
+// 🔹 función para mezclar (shuffle)
+function mezclar(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+// 🔹 render preguntas
+const form = document.getElementById("quizForm");
+
+preguntas.forEach((p, i) => {
+  const div = document.createElement("div");
+  div.className = "question";
+  div.id = "q" + i;
+
+  // mezclar opciones
+  const opcionesMezcladas = mezclar([...p.opciones]);
+
+  let html = `<p>${p.texto}</p>`;
+
+  opcionesMezcladas.forEach((op, j) => {
+    html += `
+      <label>
+        <input type="radio" name="q${i}" value="${op.correcta}">
+        ${op.texto}
+      </label><br>
+    `;
+  });
+
+  div.innerHTML = html;
+  form.appendChild(div);
+});
+
+// 🔹 evaluar
+function evaluar() {
+  let correctas = 0;
+
+  preguntas.forEach((p, i) => {
+    const seleccion = document.querySelector(`input[name="q${i}"]:checked`);
+    const div = document.getElementById("q" + i);
+
+    div.classList.remove("correct", "incorrect");
+
+    if (seleccion) {
+      if (seleccion.value === "true") {
+        div.classList.add("correct");
+        correctas++;
+      } else {
+        div.classList.add("incorrect");
+      }
+    } else {
+      div.classList.add("incorrect");
+    }
+  });
+
+  document.getElementById("resultado").innerText =
+    `Resultado: ${correctas} / ${preguntas.length}`;
+}
+</script>
+
+</body>
+</html>

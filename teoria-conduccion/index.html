@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cuestionario</title>
+<style>
+  body {
+    font-family: Arial;
+    margin: 20px;
+    background: #f4f6f8;
+  }
+
+  h1 {
+    text-align: center;
+  }
+
+  .question {
+    background: white;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .correct {
+    background-color: #d4edda;
+  }
+
+  .incorrect {
+    background-color: #f8d7da;
+  }
+
+  button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  #resultado {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<h1>Teoría de la conducción</h1>
+
+<form id="quizForm"></form>
+
+<button onclick="evaluar()">Evaluar</button>
+
+<div id="resultado"></div>
+
+<script>
+// 🔹 JSON de preguntas
+const preguntas = [
+  {
+    "id": 1,
+    "texto": "1. Los fluidos que debemos revisar antes de encender el vehículo son:",
+    "opciones": [
+      { "texto": "a) Aceite del motor, refrigerante, hidráulico y líquido de frenos.", "correcta": true },
+      { "texto": "b) Aceite del motor, agua, alcohol, electrolitos y líquido de frenos.", "correcta": false },
+      { "texto": "c) Aceite del motor, refrigerante, hidráulico, aire de ruedas y líquido de embrague.", "correcta": false }
+    ]
+  },
+  {
+    "id": 2,
+    "texto": "2. ¿Qué condiciones debe tener un vehículo antes de hacer las revisiones previas?",
+    "opciones": [
+      { "texto": "a) Motor encendido y estar en un lugar plano.", "correcta": false },
+      { "texto": "b) Motor encendido y estar en un lugar seguro.", "correcta": false },
+      { "texto": "c) Motor frío y en un lugar plano.", "correcta": true }
+    ]
+  },
+  {
+    "id": 3,
+    "texto": "3. La presión de aire de los neumáticos se verifica:",
+    "opciones": [
+      { "texto": "a) Con los neumáticos fríos, sin rodar.", "correcta": true },
+      { "texto": "b) Al finalizar el día de trabajo.", "correcta": false },
+      { "texto": "c) Después de haber rodado un tramo corto.", "correcta": false }
+    ]
+  },
+  {
+    "id": 4,
+    "texto": "4. Al revisar los neumáticos, se debe tomar en cuenta lo siguiente:",
+    "opciones": [
+      { "texto": "a) La presión de aire, el dibujo del labrado y su estado físico.", "correcta": true },
+      { "texto": "b) Que sea un neumático todoterreno para no tener inconvenientes.", "correcta": false },
+      { "texto": "c) El neumático este en buen estado para realizar un viaje largo.", "correcta": false }
+    ]
+  },
+  {
+    "id": 5,
+    "texto": "5. El labrado mínimo que debe tener un neumático es:",
+    "opciones": [
+      { "texto": "a) 1,6 cm.", "correcta": false },
+      { "texto": "b) 1,6 mm.", "correcta": true },
+      { "texto": "c) 1,6 m.", "correcta": false }
+    ]
+  },
+  {
+    "id": 6,
+    "texto": "6. Si la banda de rodadura se desgasta en el centro, significa que:",
+    "opciones": [
+      { "texto": "a) El neumático tiene presión normal.", "correcta": false },
+      { "texto": "b) Hay demasiada presión de aire en el neumático.", "correcta": true },
+      { "texto": "c) No tiene suficiente presión de aire.", "correcta": false }
+    ]
+  },
+  {
+    "id": 7,
+    "texto": "7. La finalidad del líquido refrigerante es:",
+    "opciones": [
+      { "texto": "a) Mantener la temperatura ideal de funcionamiento del motor.", "correcta": true },
+      { "texto": "b) Permitir que funcione correctamente la calefacción del vehículo.", "correcta": false },
+      { "texto": "c) Hacer que circule líquido por el radiador.", "correcta": false }
+    ]
+  },
+  {
+    "id": 8,
+    "texto": "8. El filtro de aceite sirve para:",
+    "opciones": [
+      { "texto": "a) Enfriar el aceite del motor.", "correcta": false },
+      { "texto": "b) Retener impurezas que podrían provocar un desgaste excesivo del motor.", "correcta": true },
+      { "texto": "c) Hacer que pase aire limpio al sistema de admisión.", "correcta": false }
+    ]
+  },
+  {
+    "id": 9,
+    "texto": "9. La palanca de velocidades tiene la reversa:",
+    "opciones": [
+      { "texto": "a) En el lado derecho extremo inferior.", "correcta": false },
+      { "texto": "b) En el lado izquierdo extremo superior.", "correcta": false },
+      { "texto": "c) Dependiendo la marca del vehículo.", "correcta": true }
+    ]
+  },
+  {
+    "id": 10,
+    "texto": "10. El volante realiza la función de:",
+    "opciones": [
+      { "texto": "a) Dirigir el vehículo acorde a las necesidades del peatón.", "correcta": false },
+      { "texto": "b) Dirigir a la persona acorde a las necesidades del vehículo.", "correcta": false },
+      { "texto": "c) Dirigir el vehículo acorde a las necesidades del conductor.", "correcta": true }
+    ]
+  },
+  {
+    "id": 11,
+    "texto": "11. Las luces testigo de color amarillo significa:",
+    "opciones": [
+      { "texto": "a) Atención al detenernos.", "correcta": false },
+      { "texto": "b) Atención a la brevedad posible.", "correcta": true },
+      { "texto": "c) Informativas.", "correcta": false }
+    ]
+  },
+  {
+    "id": 12,
+    "texto": "12. El pedal del acelerador debemos manipularlo con:",
+    "opciones": [
+      { "texto": "a) El pie izquierdo.", "correcta": false },
+      { "texto": "b) La mano derecha.", "correcta": false },
+      { "texto": "c) El pie derecho.", "correcta": true }
+    ]
+  },
+  {
+    "id": 13,
+    "texto": "13. En qué momento es oportuno hacer la regulación del asiento del conductor:",
+    "opciones": [
+      { "texto": "a) Antes de iniciar la marcha del motor.", "correcta": true },
+      { "texto": "b) Aprovechando la luz roja del semáforo.", "correcta": false },
+      { "texto": "c) Mientras se está conduciendo.", "correcta": false }
+    ]
+  },
+  {
+    "id": 14,
+    "texto": "14. Los triángulos de seguridad en perímetro urbano se deben colocar de:",
+    "opciones": [
+      { "texto": "a) 150 a 300 m.", "correcta": false },
+      { "texto": "b) 7 a 10 m.", "correcta": true },
+      { "texto": "c) 50 a 150 m.", "correcta": false }
+    ]
+  },
+  {
+    "id": 15,
+    "texto": "15. El botiquín de primeros auxilios tiene como misión:",
+    "opciones": [
+      { "texto": "a) Realizar cirugías en caso de accidentes.", "correcta": false },
+      { "texto": "b) Brindar primeros auxilios en caso de accidentes.", "correcta": true },
+      { "texto": "c) Vender insumos en caso de accidentes.", "correcta": false }
+    ]
+  },
+  {
+    "id": 16,
+    "texto": "16. La regulación de los espejos retrovisores es:",
+    "opciones": [
+      { "texto": "a) 90% al vehículo y 10% a la vía.", "correcta": false },
+      { "texto": "b) 50% al vehículo y 50% a la vía.", "correcta": false },
+      { "texto": "c) 10% al vehículo y 90% a la vía.", "correcta": true }
+    ]
+  },
+  {
+    "id": 17,
+    "texto": "17. Dispositivo para medir el aceite de motor:",
+    "opciones": [
+      { "texto": "a) Bayoneta.", "correcta": true },
+      { "texto": "b) Furgoneta.", "correcta": false },
+      { "texto": "c) Hidrómetro.", "correcta": false }
+    ]
+  },
+  {
+    "id": 18,
+    "texto": "18. La posición de las manos en el volante sin airbag según las manecillas de reloj es:",
+    "opciones": [
+      { "texto": "a) 10 y 3.", "correcta": false },
+      { "texto": "b) 9 y 3.", "correcta": false },
+      { "texto": "c) 10 para las 2.", "correcta": true }
+    ]
+  },
+  {
+    "id": 19,
+    "texto": "19. Cuál es la finalidad del radiador:",
+    "opciones": [
+      { "texto": "a) Calentar el aire que ingresa al motor.", "correcta": false },
+      { "texto": "b) Suministrar un medio para reducir rápidamente la temperatura del motor.", "correcta": true },
+      { "texto": "c) Suministrar un medio para calentar a los ocupantes de un automotor.", "correcta": false }
+    ]
+  },
+  {
+    "id": 20,
+    "texto": "20. Que es un alternador:",
+    "opciones": [
+      { "texto": "a) Es una bomba.", "correcta": false },
+      { "texto": "b) Es un generador de energía.", "correcta": true },
+      { "texto": "c) Es un elemento del sistema de lubricación.", "correcta": false }
+    ]
+  },
+  {
+    "id": 21,
+    "texto": "21. Que es una batería:",
+    "opciones": [
+      { "texto": "a) Es un generador de energía.", "correcta": false },
+      { "texto": "b) Es una válvula.", "correcta": false },
+      { "texto": "c) Es un almacenador de energía.", "correcta": true }
+    ]
+  },
+  {
+    "id": 22,
+    "texto": "22. Que función cumple el embrague:",
+    "opciones": [
+      { "texto": "a) Dar más revoluciones al motor.", "correcta": false },
+      { "texto": "b) Frenar momentáneamente la velocidad para el cambio de marcha.", "correcta": false },
+      { "texto": "c) Conectar y desconectar al motor de la transmisión.", "correcta": true }
+    ]
+  },
+  {
+    "id": 23,
+    "texto": "23. Que función cumple el filtro de aire:",
+    "opciones": [
+      { "texto": "a) Permite que ingresen fluidos al motor reteniendo las impurezas.", "correcta": false },
+      { "texto": "b) Permite que ingrese lubricante al motor reteniendo las impurezas.", "correcta": false },
+      { "texto": "c) Permite que ingrese aire limpio al motor reteniendo las impurezas.", "correcta": true }
+    ]
+  },
+  {
+    "id": 24,
+    "texto": "24. Por qué razón, debe usted, utilizar el cinturón de seguridad:",
+    "opciones": [
+      { "texto": "a) Por ser una contravención de tránsito y por seguridad.", "correcta": true },
+      { "texto": "b) Para que el agente de tránsito, no le llame la atención.", "correcta": false },
+      { "texto": "c) Porque es costumbre.", "correcta": false }
+    ]
+  },
+  {
+    "id": 25,
+    "texto": "25. Los ángulos de visión no cubiertos por los tres espejos retrovisores: central y laterales y por la visión directa delantera se conocen como:",
+    "opciones": [
+      { "texto": "a) Punto ciego.", "correcta": true },
+      { "texto": "b) Panorama de la situación de tránsito.", "correcta": false },
+      { "texto": "c) Observar una forma más amplia de circulación en la vía.", "correcta": false }
+    ]
+  },
+  {
+    "id": 26,
+    "texto": "26. En cuál de los siguientes casos es obligatorio el uso de luces direccionales, antes de realizar un viraje:",
+    "opciones": [
+      { "texto": "a) Si el conductor lo desea.", "correcta": false },
+      { "texto": "b) Si está el agente de tránsito.", "correcta": false },
+      { "texto": "c) Siempre.", "correcta": true }
+    ]
+  },
+  {
+    "id": 27,
+    "texto": "27. En relación a las llantas, cuándo se prohíbe la circulación de un vehículo:",
+    "opciones": [
+      { "texto": "a) Cuando las llantas se encuentran en mal estado.", "correcta": false },
+      { "texto": "b) Cuya banda de rodadura de la llanta tenga un labrado inferior a 1.6mm.", "correcta": false },
+      { "texto": "c) Todas las anteriores.", "correcta": true }
+    ]
+  },
+  {
+    "id": 28,
+    "texto": "28. Un vehículo debe tener obligatoriamente las siguientes luces:",
+    "opciones": [
+      { "texto": "a) Posición, cruce, carretera, freno, marcha atrás y neblineros.", "correcta": false },
+      { "texto": "b) Altas, bajas, medias, direccionales, freno, marcha atrás.", "correcta": true },
+      { "texto": "c) De emergencia, y de alumbramiento.", "correcta": false }
+    ]
+  },
+  {
+    "id": 29,
+    "texto": "29. El dispositivo de seguridad que reduce el desplazamiento de la cabeza hacia atrás para evitar el fenómeno de látigo sobre el cuello, se conoce como:",
+    "opciones": [
+      { "texto": "a) Apoya cabeza.", "correcta": true },
+      { "texto": "b) Cinturón de seguridad.", "correcta": false },
+      { "texto": "c) Airbag.", "correcta": false }
+    ]
+  },
+  {
+    "id": 30,
+    "texto": "30. Como se conoce el dispositivo de seguridad pasiva incluida en algunos vehículos, el cual se acciona en milisegundos al producirse un impacto:",
+    "opciones": [
+      { "texto": "a) Apoya cabeza.", "correcta": false },
+      { "texto": "b) Cinturón de seguridad.", "correcta": false },
+      { "texto": "c) Airbag o bolsa de aire.", "correcta": true }
+    ]
+  },
+  {
+    "id": 31,
+    "texto": "31. Que significa el sistema \"keyless\"?",
+    "opciones": [
+      { "texto": "a) Sistema manos libres.", "correcta": false },
+      { "texto": "b) Sistema libre de llaves.", "correcta": true },
+      { "texto": "c) Sistema electrónico del vehículo.", "correcta": false }
+    ]
+  },
+  {
+    "id": 32,
+    "texto": "32. El sistema que permite detener el vehículo a voluntad del conductor se llama:",
+    "opciones": [
+      { "texto": "a) Sistema de cambios.", "correcta": false },
+      { "texto": "b) Sistema de encendido.", "correcta": false },
+      { "texto": "c) Sistema de frenos.", "correcta": true }
+    ]
+  },
+  {
+    "id": 33,
+    "texto": "33. El freno de estacionamiento actúa sobre:",
+    "opciones": [
+      { "texto": "a) Los neumáticos delanteros.", "correcta": false },
+      { "texto": "b) Los neumáticos posteriores.", "correcta": true },
+      { "texto": "c) Sobre los cuatro neumáticos.", "correcta": false }
+    ]
+  },
+  {
+    "id": 34,
+    "texto": "34. Que provoca la emisión de ruidos anormales al frenar:",
+    "opciones": [
+      { "texto": "a) El exceso de peso en el automotor.", "correcta": false },
+      { "texto": "b) El desgaste de zapatas y pastillas.", "correcta": true },
+      { "texto": "c) Falta de lubricación en los frenos.", "correcta": false }
+    ]
+  },
+  {
+    "id": 35,
+    "texto": "35. En qué momento se debe utilizar el triángulo de seguridad:",
+    "opciones": [
+      { "texto": "a) Cuando el vehículo se encuentra detenido en la calzada por un desperfecto.", "correcta": true },
+      { "texto": "b) Cuando el vehículo se encuentra estacionado en un paso cebra.", "correcta": false },
+      { "texto": "c) Cuando el vehículo se encuentra estacionado en zonas de parqueo tarifado.", "correcta": false }
+    ]
+  },
+  {
+    "id": 36,
+    "texto": "36. Cuando conduce, que documentos está obligado a portar usted siempre en su vehículo:",
+    "opciones": [
+      { "texto": "a) La matrícula del vehículo.", "correcta": false },
+      { "texto": "b) La licencia de conducir.", "correcta": false },
+      { "texto": "c) Todas las anteriores.", "correcta": true }
+    ]
+  },
+  {
+    "id": 37,
+    "texto": "37. Todos los vehículos deberán tener cinturones de seguridad para:",
+    "opciones": [
+      { "texto": "a) Para los pasajeros.", "correcta": false },
+      { "texto": "b) Para el conductor.", "correcta": false },
+      { "texto": "c) Todas las anteriores.", "correcta": true }
+    ]
+  },
+  {
+    "id": 38,
+    "texto": "38. Si usted sufre un desperfecto en su vehículo y tiene que inmovilizarlo al lado derecho de la calzada: ¿Debe poner los triángulos de seguridad?",
+    "opciones": [
+      { "texto": "a) No, porque el vehículo está al lado derecho de la calzada.", "correcta": false },
+      { "texto": "b) Si, en todo momento.", "correcta": true },
+      { "texto": "c) Si, por las noches.", "correcta": false }
+    ]
+  },
+  {
+    "id": 39,
+    "texto": "39. Cuando un neumático delantero tiene baja presión.",
+    "opciones": [
+      { "texto": "a) El motor pierde potencia", "correcta": false },
+      { "texto": "b) Se sobrecalienta el motor", "correcta": false },
+      { "texto": "c) La dirección del vehículo tiende hacia un lado.", "correcta": true }
+    ]
+  },
+  {
+    "id": 40,
+    "texto": "40. Si los neumáticos de un vehículo cuentan con un nivel de presión demasiado bajo. Qué parte de la banda de rodadura sufrirá mayor desgaste.",
+    "opciones": [
+      { "texto": "a) Solo el centro de la banda", "correcta": false },
+      { "texto": "b) El centro y ambos lados de la banda.", "correcta": false },
+      { "texto": "c) Ambos lados de la banda.", "correcta": true }
+    ]
+  },
+  {
+    "id": 41,
+    "texto": "41. A que distancia es recomendado cambiar de luz alta a luz baja:",
+    "opciones": [
+      { "texto": "a) A 200 metros del vehículo que me antecede.", "correcta": false },
+      { "texto": "b) A 200 metros del vehículo que circula en sentido contrario.", "correcta": false },
+      { "texto": "c) Todas las anteriores.", "correcta": true }
+    ]
+  }
+]
+
+
+
+// 🔹 función para mezclar (shuffle)
+function mezclar(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+// 🔹 render preguntas
+const form = document.getElementById("quizForm");
+
+preguntas.forEach((p, i) => {
+  const div = document.createElement("div");
+  div.className = "question";
+  div.id = "q" + i;
+
+  // mezclar opciones
+  const opcionesMezcladas = mezclar([...p.opciones]);
+
+  let html = `<p>${p.texto}</p>`;
+
+  opcionesMezcladas.forEach((op, j) => {
+    html += `
+      <label>
+        <input type="radio" name="q${i}" value="${op.correcta}">
+        ${op.texto}
+      </label><br>
+    `;
+  });
+
+  div.innerHTML = html;
+  form.appendChild(div);
+});
+
+// 🔹 evaluar
+function evaluar() {
+  let correctas = 0;
+
+  preguntas.forEach((p, i) => {
+    const seleccion = document.querySelector(`input[name="q${i}"]:checked`);
+    const div = document.getElementById("q" + i);
+
+    div.classList.remove("correct", "incorrect");
+
+    if (seleccion) {
+      if (seleccion.value === "true") {
+        div.classList.add("correct");
+        correctas++;
+      } else {
+        div.classList.add("incorrect");
+      }
+    } else {
+      div.classList.add("incorrect");
+    }
+  });
+
+  document.getElementById("resultado").innerText =
+    `Resultado: ${correctas} / ${preguntas.length}`;
+}
+</script>
+
+</body>
+</html>
