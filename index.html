@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cuestionario</title>
+<style>
+  body {
+    font-family: Arial;
+    margin: 20px;
+    background: #f4f6f8;
+  }
+
+  h1 {
+    text-align: center;
+  }
+
+  .question {
+    background: white;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+
+  .correct {
+    background-color: #d4edda;
+  }
+
+  .incorrect {
+    background-color: #f8d7da;
+  }
+
+  button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  #resultado {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<h1>Leyes y Reglamentos</h1>
+
+<form id="quizForm"></form>
+
+<button onclick="evaluar()">Evaluar</button>
+
+<div id="resultado"></div>
+
+<script>
+// 🔹 JSON de preguntas
+const preguntas = [
+  {
+    "id": 1,
+    "texto": "Pregunta 1.- Señale la opción correcta:\nLa legislación de tránsito tiene por objeto:",
+    "opciones": [
+      { "texto": "a) La organización, planificación, fomento, regulación, modernización y control del Transporte Terrestre, Tránsito y Seguridad Vial.", "correcta": true },
+      { "texto": "b) La organización, planificación, fomento, regulación y control del Transporte Terrestre, Tránsito y Seguridad Vial.", "correcta": false },
+      { "texto": "c) La organización, planificación, fomento, modernización y control del Transporte Terrestre, Tránsito y Seguridad Vial.", "correcta": false },
+      { "texto": "d) La organización, fomento, regulación, modernización y control del Transporte Terrestre, Tránsito y Seguridad Vial.", "correcta": false }
+    ]
+  },
+  {
+    "id": 2,
+    "texto": "Pregunta 2.- Señale la opción correcta:\nLa legislación de tránsito se basa en los principios de:",
+    "opciones": [
+      { "texto": "a) Equidad.", "correcta": false },
+      { "texto": "b) Equidad y libre movilidad.", "correcta": false },
+      { "texto": "c) Equidad, libre movilidad y desarrollo sostenible.", "correcta": true },
+      { "texto": "d) Ninguna de las anteriores.", "correcta": false }
+    ]
+  },
+  {
+    "id": 3,
+    "texto": "Pregunta 3.- Señale la respuesta correcta:\nEl servicio de transporte público deberá basarse en los principios de:",
+    "opciones": [
+      { "texto": "a) seguridad, eficiencia, responsabilidad, universalidad, accesibilidad, continuidad y calidad, con tarifas socialmente justas.", "correcta": true },
+      { "texto": "b) seguridad, universalidad, accesibilidad, continuidad y calidad, con tarifas socialmente justas.", "correcta": false },
+      { "texto": "c) seguridad, eficiencia, responsabilidad, universalidad, accesibilidad, continuidad y calidad.", "correcta": false },
+      { "texto": "d) seguridad, eficiencia y responsabilidad.", "correcta": false }
+    ]
+  },
+  {
+    "id": 4,
+    "texto": "Pregunta 4.- Señale la respuesta correcta:\nLa enseñanza sobre regulaciones de tránsito, transporte terrestre y seguridad vial es:",
+    "opciones": [
+      { "texto": "a) Facultativa.", "correcta": false },
+      { "texto": "b) Obligatoria.", "correcta": true },
+      { "texto": "c) No es necesaria.", "correcta": false },
+      { "texto": "d) Ninguna de la anteriores.", "correcta": false }
+    ]
+  },
+  {
+    "id": 5,
+    "texto": "Pregunta 5.- Señale la respuesta correcta:\nLa capacitación a conductores profesionales y no profesionales en materia de tránsito, transporte terrestre y seguridad vial es:",
+    "opciones": [
+      { "texto": "a) Obligatoria.", "correcta": true },
+      { "texto": "b) Facultativa.", "correcta": false },
+      { "texto": "c) No es necesaria.", "correcta": false },
+      { "texto": "d) Ninguna de la anteriores.", "correcta": false }
+    ]
+  },
+  {
+    "id": 6,
+    "texto": "Pregunta 6.- Señale la respuesta correcta:\nLa capacitación a conductores profesionales y no profesionales en materia de tránsito, transporte terrestre y seguridad vial lo hace:",
+    "opciones": [
+      { "texto": "a) Solamente el Estado a través de sus instituciones.", "correcta": false },
+      { "texto": "b) Las escuelas de conducción de empresas privadas.", "correcta": false },
+      { "texto": "c) Las escuelas de conducción privadas y de los sindicatos de choferes profesionales.", "correcta": true },
+      { "texto": "d) Solamente Los sindicatos de choferes profesionales.", "correcta": false }
+    ]
+  },
+  {
+    "id": 7,
+    "texto": "Pregunta 7.- Señale la respuesta correcta:\n¿Cuál es el propietario de las vías públicas?",
+    "opciones": [
+      { "texto": "e) El público en general.", "correcta": false },
+      { "texto": "f) El Estado.", "correcta": true },
+      { "texto": "g) Las personas naturales.", "correcta": false },
+      { "texto": "h) Las personas jurídicas.", "correcta": false }
+    ]
+  },
+  {
+    "id": 8,
+    "texto": "Pregunta 8.- Señale la respuesta correcta:\nLas vías de circulación terrestre del país son bienes nacionales de:",
+    "opciones": [
+      { "texto": "a) Uso público", "correcta": true },
+      { "texto": "b) Uso privado", "correcta": false },
+      { "texto": "c) Uso solamente comunitario", "correcta": false },
+      { "texto": "d) Ninguna de las anteriores", "correcta": false }
+    ]
+  },
+  {
+    "id": 9,
+    "texto": "Pregunta 9.- Señale la respuesta correcta:\nEn qué tipo de situaciones el Estado puede restringir la circulación y libre movilidad humana:",
+    "opciones": [
+      { "texto": "a) Por la sola voluntad del presiente.", "correcta": false },
+      { "texto": "b) Por estados de emergencia y excepción", "correcta": true },
+      { "texto": "c) Por simple disposición del Ministerio de Transporte", "correcta": false },
+      { "texto": "d) La circulación y y libre movilidad humana no puede ser restringida por ningún motivo.", "correcta": false }
+    ]
+  },
+  {
+    "id": 10,
+    "texto": "Pregunta 10.- Señale la respuesta correcta:\nLa legislación de tránsito regula y controla el traslado de semovientes (animales) por las vías públicas:",
+    "opciones": [
+      { "texto": "a) No, solo de personas y bienes.", "correcta": false },
+      { "texto": "b) No, solo de personas.", "correcta": false },
+      { "texto": "c) Sí, siempre.", "correcta": true },
+      { "texto": "d) Sí, solo en vías privadas.", "correcta": false }
+    ]
+  },
+  {
+    "id": 11,
+    "texto": "Pregunta 11.- Señale la respuesta correcta:\n¿Cuáles son los organismos públicos del transporte terrestre, tránsito y seguridad vial?",
+    "opciones": [
+      { "texto": "a) El Ministerio de Transporte y Obras Públicas, la Agencia Nacional de Tránsito, los GADS y el Ministerio de Gobierno.", "correcta": true },
+      { "texto": "b) El Ministerio de Transporte y Obras Públicas y la Agencia Nacional de Tránsito.", "correcta": false },
+      { "texto": "c) El Ministerio de Transporte y Obras Públicas, la Agencia Nacional de Tránsito y los GADS.", "correcta": false },
+      { "texto": "d) Solo el Ministerio de Transporte y Obras Públicas.", "correcta": false }
+    ]
+  },
+  {
+    "id": 12,
+    "texto": "Pregunta 12.- Señale la respuesta correcta:\n¿Cuál es el órgano público que ejerce la rectoría en el sector del del transporte terrestre, tránsito y seguridad vial?",
+    "opciones": [
+      { "texto": "a) La EMOV EP.", "correcta": false },
+      { "texto": "b) El Ministerio de Gobierno.", "correcta": false },
+      { "texto": "c) La Policía Nacional.", "correcta": false },
+      { "texto": "d) El Ministerio de Transporte y Obras Públicas.", "correcta": true }
+    ]
+  },
+  {
+    "id": 13,
+    "texto": "Pregunta 12.- Señale la respuesta correcta:\nLos GADS que han asumido la totalidad de la competencia en materia de tránsito y transporte terrestre tienen la obligación de tener:",
+    "opciones": [
+      { "texto": "a) Una entidad delegada, matriculación, revisión técnica vehicular, emisión de títulos habilitantes y agentes civiles de tránsito.", "correcta": true },
+      { "texto": "b) Una entidad delegada, matriculación y emisión de títulos habilitantes.", "correcta": false },
+      { "texto": "c) Una entidad delegada y matriculación.", "correcta": false },
+      { "texto": "d) Solo una entidad delegada.", "correcta": false }
+    ]
+  },
+  {
+    "id": 14,
+    "texto": "Pregunta 12.- Señale la respuesta correcta:\nLos GADS antes de empezar a utilizar medios tecnológicos para detectar infracciones de tránsito deben:",
+    "opciones": [
+      { "texto": "a) Solamente colocarlos en las vías públicas.", "correcta": false },
+      { "texto": "b) Solamente homologarlos.", "correcta": false },
+      { "texto": "c) Homologarlos y calibrarlos.", "correcta": false },
+      { "texto": "d) Homologarlos, calibrarlos y socializarlos.", "correcta": true }
+    ]
+  },
+  {
+    "id": 15,
+    "texto": "Pregunta 13.- Señale la respuesta correcta:\n¿Cuáles son las clases de transporte terrestre?",
+    "opciones": [
+      { "texto": "a) Cuenta propia y particular.", "correcta": false },
+      { "texto": "b) Comercial y público.", "correcta": false },
+      { "texto": "c) Público, comercial, cuenta propia y particular.", "correcta": true },
+      { "texto": "d) Ninguna de las anteriores.", "correcta": false }
+    ]
+  },
+  {
+    "id": 16,
+    "texto": "Pregunta 14.- Señale la respuesta correcta:\nEl servicio de transporte público de pasajeros podrá ser prestado por el Estado:",
+    "opciones": [
+      { "texto": "a) Si el Estado así lo considera, es decir, es facultativo.", "correcta": false },
+      { "texto": "b) Directa o indirectamente mediante una operadora privada.", "correcta": true },
+      { "texto": "c) Solo directamente.", "correcta": false },
+      { "texto": "d) Solo indirectamente mediante una operadora privada.", "correcta": false }
+    ]
+  },
+  {
+    "id": 17,
+    "texto": "Pregunta 15.- Señale la respuesta correcta:\nEl transporte público de pasajeros se clasifica en:",
+    "opciones": [
+      { "texto": "a) Colectivo y convencional.", "correcta": false },
+      { "texto": "b) En taxi, mixto y ejecutivo.", "correcta": false },
+      { "texto": "c) Masivo y de carga.", "correcta": false },
+      { "texto": "d) Colectivo y Masivo.", "correcta": true }
+    ]
+  },
+  {
+    "id": 18,
+    "texto": "Pregunta 16.- Señale la respuesta correcta:\nEl transporte comercial de taxi se clasifica en:",
+    "opciones": [
+      { "texto": "a) Colectivo y Masivo.", "correcta": false },
+      { "texto": "b) Ejecutivos y Convencionales.", "correcta": true },
+      { "texto": "c) En público y privado.", "correcta": false },
+      { "texto": "d) Ninguna de las anteriores.", "correcta": false }
+    ]
+  },
+  {
+    "id": 19,
+    "texto": "Pregunta 17.- Señale la respuesta correcta:\nEl transporte comercial institucional y/o escolar puede transportar:",
+    "opciones": [
+      { "texto": "a) Alumnado y personal de instituciones públicas y privadas.", "correcta": true },
+      { "texto": "b) Solo alumnado estudiantil.", "correcta": false },
+      { "texto": "c) Solo personal de instituciones públicas.", "correcta": false },
+      { "texto": "d) Turistas.", "correcta": false }
+    ]
+  },
+  {
+    "id": 20,
+    "texto": "Pregunta 18.- Señale la respuesta correcta:\nEl transporte comercial mixto realmente debe llevar:",
+    "opciones": [
+      { "texto": "a) Personas o bienes.", "correcta": false },
+      { "texto": "b) Personas y bienes.", "correcta": true },
+      { "texto": "c) Solo estudiantes.", "correcta": false },
+      { "texto": "d) Solo bienes.", "correcta": false }
+    ]
+  },
+  {
+    "id": 21,
+    "texto": "Pregunta 19.- Señale la respuesta correcta:\nEl transporte comercial alternativo excepcional (tricimotos, motostaxi) puede ser autorizado:",
+    "opciones": [
+      { "texto": "a) En todo el país.", "correcta": false },
+      { "texto": "b) Solo en zonas urbano marginales.", "correcta": false },
+      { "texto": "c) Solo en zonas urbano marginales, parroquias rurales y zonas de frontera.", "correcta": true },
+      { "texto": "d) Solo en a región costa.", "correcta": false }
+    ]
+  },
+  {
+    "id": 22,
+    "texto": "Pregunta 20.- Señale la respuesta correcta:\nEl transporte por cuenta propia es:",
+    "opciones": [
+      { "texto": "a) Sirve para satisfacer las necesidades propias del negocio o comercio de personas naturales o personas jurídicas.", "correcta": true },
+      { "texto": "b) Sirve para transportar pasajeros del público en general.", "correcta": false },
+      { "texto": "c) Sirve para las necesidades particulares y personales de su dueño.", "correcta": false },
+      { "texto": "d) Sirve para prestar el servicio de transporte a terceros.", "correcta": false }
+    ]
+  },
+  {
+    "id": 23,
+    "texto": "Pregunta 21.- Señale la respuesta correcta:\nEl transporte particular es:",
+    "opciones": [
+      { "texto": "a) Para utilizarlo como vehículo de transporte público o comercial.", "correcta": false },
+      { "texto": "b) Para las necesidades de un negocio.", "correcta": false },
+      { "texto": "c) Para transportar carga pesada de terceros.", "correcta": false },
+      { "texto": "d) Para necesidades personales, particulares, laborales y educativas del dueño del vehículo y su familia.", "correcta": true }
+    ]
+  },
+  {
+    "id": 24,
+    "texto": "Pregunta 22.- Señale la respuesta correcta:\n¿Cuál no es un ámbito del transporte terrestre:",
+    "opciones": [
+      { "texto": "a) Interprovincial", "correcta": false },
+      { "texto": "b) Intracantonal", "correcta": false },
+      { "texto": "c) Intercantonal", "correcta": true },
+      { "texto": "d) Internacional", "correcta": false }
+    ]
+  },
+  {
+    "id": 25,
+    "texto": "Pregunta 23.- Señale la respuesta correcta:\nEl transporte comercial de taxi, institucional y/o escolar y el mixto solo tiene ámbito de transporte:",
+    "opciones": [
+      { "texto": "a) Internacional", "correcta": false },
+      { "texto": "b) Intracantonal", "correcta": true },
+      { "texto": "c) Interprovincial", "correcta": false },
+      { "texto": "d) Intraprovincial", "correcta": false }
+    ]
+  },
+  {
+    "id": 26,
+    "texto": "Pregunta 24.- Señale la respuesta correcta:\nEl ámbito de transporte intracantonal significa:",
+    "opciones": [
+      { "texto": "a) Dentro del cantón, zona urbana y rural", "correcta": true },
+      { "texto": "b) Fuera del cantón", "correcta": false },
+      { "texto": "c) Fuera de territorio ecuatoriano", "correcta": false },
+      { "texto": "d) Alrededor del país", "correcta": false }
+    ]
+  },
+  {
+    "id": 27,
+    "texto": "Pregunta 25.- Señale la respuesta correcta:\n¿Cuál es el título habilitante del transporte público?",
+    "opciones": [
+      { "texto": "a) Permiso de operación.", "correcta": false },
+      { "texto": "b) Matrícula.", "correcta": false },
+      { "texto": "c) Contrato de operación.", "correcta": true },
+      { "texto": "d) Autorización de operación.", "correcta": false }
+    ]
+  },
+  {
+    "id": 28,
+    "texto": "Pregunta 26.- Señale la respuesta correcta:\n¿Cuál es el título habilitante del transporte comercial?",
+    "opciones": [
+      { "texto": "a) Permiso de operación.", "correcta": true },
+      { "texto": "b) Matrícula.", "correcta": false },
+      { "texto": "c) Contrato de operación.", "correcta": false },
+      { "texto": "d) Autorización de operación.", "correcta": false }
+    ]
+  },
+  {
+    "id": 29,
+    "texto": "Pregunta 27.- Señale la respuesta correcta: ¿Cuál es el título habilitante del transporte por cuenta propia?",
+    "opciones": [
+      { "texto": "a) Permiso de operación.", "correcta": false },
+      { "texto": "b) Matrícula.", "correcta": false },
+      { "texto": "c) Contrato de operación.", "correcta": false },
+      { "texto": "d) Autorización de operación.", "correcta": true }
+    ]
+  },
+  {
+    "id": 30,
+    "texto": "Pregunta 28.- Señale la respuesta correcta:\n¿Cuál es el ente público encargado de otorgar el título habilitante del transporte comercial en el ámbito intracantonal?",
+    "opciones": [
+      { "texto": "a) GADS", "correcta": true },
+      { "texto": "b) Ministerio de Transporte", "correcta": false },
+      { "texto": "c) ANT", "correcta": false },
+      { "texto": "d) CTE", "correcta": false }
+    ]
+  },
+  {
+    "id": 31,
+    "texto": "Pregunta 29.- Señale la respuesta correcta:\n¿Cuál es el ente público encargado de otorgar el título habilitante del transporte público en el ámbito interprovincial?",
+    "opciones": [
+      { "texto": "a) GADS", "correcta": false },
+      { "texto": "b) Ministerio de Transporte", "correcta": false },
+      { "texto": "c) ANT", "correcta": true },
+      { "texto": "d) CTE", "correcta": false }
+    ]
+  },
+  {
+    "id": 32,
+    "texto": "Pregunta 30.- Señale la respuesta correcta:\n¿Cuál es el ente público encargado de otorgar título habilitante del transporte por cuenta en todos los ámbitos?",
+    "opciones": [
+      { "texto": "a) GADS", "correcta": false },
+      { "texto": "b) Ministerio de Transporte", "correcta": false },
+      { "texto": "c) ANT", "correcta": true },
+      { "texto": "d) CTE", "correcta": false }
+    ]
+  }
+]
+
+
+// 🔹 función para mezclar (shuffle)
+function mezclar(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+// 🔹 render preguntas
+const form = document.getElementById("quizForm");
+
+preguntas.forEach((p, i) => {
+  const div = document.createElement("div");
+  div.className = "question";
+  div.id = "q" + i;
+
+  // mezclar opciones
+  const opcionesMezcladas = mezclar([...p.opciones]);
+
+  let html = `<p>${p.texto}</p>`;
+
+  opcionesMezcladas.forEach((op, j) => {
+    html += `
+      <label>
+        <input type="radio" name="q${i}" value="${op.correcta}">
+        ${op.texto}
+      </label><br>
+    `;
+  });
+
+  div.innerHTML = html;
+  form.appendChild(div);
+});
+
+// 🔹 evaluar
+function evaluar() {
+  let correctas = 0;
+
+  preguntas.forEach((p, i) => {
+    const seleccion = document.querySelector(`input[name="q${i}"]:checked`);
+    const div = document.getElementById("q" + i);
+
+    div.classList.remove("correct", "incorrect");
+
+    if (seleccion) {
+      if (seleccion.value === "true") {
+        div.classList.add("correct");
+        correctas++;
+      } else {
+        div.classList.add("incorrect");
+      }
+    } else {
+      div.classList.add("incorrect");
+    }
+  });
+
+  document.getElementById("resultado").innerText =
+    `Resultado: ${correctas} / ${preguntas.length}`;
+}
+</script>
+
+</body>
+</html>
