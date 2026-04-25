@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="page-title">Quiz — Mecánica Básica</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0D0F14; --surface:#161A23; --surface2:#1E2330;
+    --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.14);
+    --accent:#22C47A; --accent2:#1BA369;
+    --text:#F0F2F8; --muted:#7A8099;
+    --green:#22C47A; --green-bg:rgba(34,196,122,0.12);
+    --red:#FF5A5A; --red-bg:rgba(255,90,90,0.12);
+    --blue:#4F8EF7; --blue-bg:rgba(79,142,247,0.12);
+    --amber:#F5A623; --amber-bg:rgba(245,166,35,0.12);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(34,196,122,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(34,196,122,0.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+  .glow{position:fixed;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(34,196,122,0.06) 0%,transparent 70%);top:-200px;right:-200px;pointer-events:none;z-index:0}
+  .container{max-width:760px;margin:0 auto;padding:2rem 1.5rem 4rem;position:relative;z-index:1}
+
+  /* INTRO */
+  #screen-intro{animation:fadeUp .5s ease both}
+  .breadcrumb{display:flex;align-items:center;gap:8px;margin-bottom:2rem}
+  .breadcrumb-link{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);text-decoration:none;cursor:pointer;transition:color .15s}
+  .breadcrumb-link:hover{color:var(--text)}
+  .breadcrumb-separator{color:var(--border);margin:0 4px}
+  .logo-row{display:flex;align-items:center;gap:12px;margin-bottom:2rem}
+  .logo-badge{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center}
+  .logo-badge svg{width:20px;height:20px}
+  .logo-text{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .hero-tag{display:inline-block;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(34,196,122,.3);padding:4px 12px;border-radius:20px;margin-bottom:1.5rem}
+  .hero-title{font-family:'Syne',sans-serif;font-size:clamp(32px,6vw,52px);font-weight:800;line-height:1.1;letter-spacing:-.02em;margin-bottom:1rem}
+  .hero-title em{font-style:normal;color:var(--accent)}
+  .hero-desc{font-size:16px;color:var(--muted);line-height:1.7;max-width:540px;margin-bottom:2.5rem}
+  .stats-row{display:flex;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:2.5rem}
+  .stat{flex:1;background:var(--surface);padding:1rem 1.25rem;text-align:center}
+  .stat-num{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--text);display:block}
+  .stat-lbl{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;display:block}
+  .topics{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin-bottom:2.5rem}
+  .topic-chip{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+  .topic-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+  .source-box{background:rgba(34,196,122,.08);border:1px solid rgba(34,196,122,.2);border-radius:10px;padding:14px 16px;font-size:13px;color:#7FDC9F;margin-bottom:2.5rem;line-height:1.6}
+  .source-box strong{color:#A5E8B5;font-weight:500;display:block;margin-bottom:4px}
+  .btn-start{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:#0D0F14;border:none;border-radius:10px;padding:14px 28px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:transform .15s,background .15s}
+  .btn-start:hover{background:var(--accent2);transform:translateY(-2px)}
+  .btn-start svg{width:18px;height:18px}
+
+  /* QUIZ - CONTINUOUS LIST */
+  #screen-quiz{display:none;animation:fadeUp .3s ease both}
+  .quiz-header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border);padding:1.5rem 1.5rem 1rem;margin:-2rem -1.5rem 2rem;margin-bottom:2rem}
+  .breadcrumb-back{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);text-decoration:none;cursor:pointer;margin-bottom:1rem;transition:color .2s}
+  .breadcrumb-back:hover{color:var(--text)}
+  .breadcrumb-back svg{width:14px;height:14px}
+  .progress-wrap{margin-bottom:0}
+  .progress-info{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px;color:var(--muted)}
+  .progress-info strong{color:var(--accent)}
+  .progress-bar{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden}
+  .progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease}
+
+  .questions-container{display:flex;flex-direction:column;gap:1.5rem;margin-bottom:2rem}
+  .question-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.75rem;animation:fadeUp .3s ease}
+  .question-card.answered{border-color:var(--accent)}
+  .q-meta{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+  .q-num-badge{font-family:'Syne',sans-serif;font-size:12px;font-weight:600;color:var(--muted)}
+  .section-tag{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:rgba(34,196,122,.1);border:1px solid rgba(34,196,122,.2);padding:3px 10px;border-radius:20px}
+  .q-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:1.5rem;line-height:1.4}
+  .options{display:flex;flex-direction:column;gap:12px}
+  .opt{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s;user-select:none}
+  .opt:hover{border-color:var(--border2);background:rgba(34,196,122,.05)}
+  .opt.selected{border-color:var(--accent);background:rgba(34,196,122,.08)}
+  .opt-radio{width:18px;height:18px;min-width:18px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;margin-top:2px}
+  .opt.selected .opt-radio{border-color:var(--accent);background:var(--accent)}
+  .opt.selected .opt-radio::after{content:'';width:6px;height:6px;background:#0D0F14;border-radius:50%}
+  .opt-text{font-size:14px;line-height:1.5;color:var(--text)}
+
+  .quiz-footer{text-align:right;margin-top:2rem}
+  .btn-nav{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:.04em;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--muted);transition:all .2s}
+  .btn-nav:hover{background:var(--surface2);color:var(--text);border-color:var(--border2)}
+  .btn-nav.primary{background:var(--accent);color:#0D0F14;border-color:var(--accent)}
+  .btn-nav.primary:hover{background:var(--accent2)}
+  .btn-nav.primary:disabled{opacity:.4;cursor:not-allowed}
+  .btn-nav svg{width:16px;height:16px}
+
+  /* RESULT */
+  #screen-result{display:none;animation:fadeUp .5s ease both}
+  .result-hero{text-align:center;padding:3rem 0;margin-bottom:2rem}
+  .score-ring{position:relative;width:180px;height:180px;margin:0 auto 2rem}
+  .score-ring svg{width:180px;height:180px;transform:rotate(-90deg)}
+  .score-ring .track{fill:none;stroke:var(--surface2);stroke-width:10}
+  .ring-fill{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1.2s ease}
+  .score-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .score-num{font-family:'Syne',sans-serif;font-size:48px;font-weight:800;line-height:1}
+  .score-denom{font-size:13px;color:var(--muted);margin-top:4px}
+  .result-label{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;margin-bottom:8px}
+  .result-pct{font-size:16px;color:var(--muted);margin-bottom:2rem}
+  .result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:2rem}
+  .rs{background:var(--surface);padding:1.5rem;text-align:center}
+  .rs-num{font-family:'Syne',sans-serif;font-size:28px;font-weight:700;display:block;margin-bottom:0.5rem}
+  .rs-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .review-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.75rem;margin-bottom:1.5rem}
+  .review-header{margin-bottom:1rem}
+  .review-q{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;color:var(--text);line-height:1.5}
+  .review-answers{font-size:13px;line-height:1.8;margin-top:1rem}
+  .ans-label{color:var(--muted);display:block;margin-bottom:0.3rem;font-size:12px}
+  .ans-correct{color:var(--green);font-weight:600}
+  .ans-wrong{color:var(--red);font-weight:600}
+  .ans-exp{color:var(--muted);margin-top:0.8rem;font-size:12px;line-height:1.6;padding:0.8rem;background:rgba(34,196,122,.05);border-left:2px solid var(--accent);border-radius:4px}
+  .ref-pill{display:inline-flex;align-items:center;gap:6px;margin-top:1rem;background:rgba(34,196,122,.08);border:1px solid rgba(34,196,122,.2);border-radius:6px;padding:6px 12px;font-size:11px;color:#7FDC9F}
+  .ref-pill svg{width:12px;height:12px}
+  .result-actions{display:flex;gap:12px;justify-content:center;margin-top:2rem}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  @media(max-width:600px){
+    .container{padding:1.5rem 1rem 3rem}
+    .quiz-header{margin:-1.5rem -1rem 2rem}
+    .btn-nav{width:100%;justify-content:center}
+    .result-actions{flex-direction:column;gap:10px}
+    .btn-nav{width:100%}
+  }
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="container">
+  <div id="screen-intro"></div>
+  <div id="screen-quiz">
+    <div class="quiz-header">
+      <a class="breadcrumb-back" href="../index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Volver al portal
+      </a>
+      <div class="progress-wrap">
+        <div class="progress-info"><span>Respondidas</span><strong id="prog-count">0 / 0</strong></div>
+        <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="questions-container" id="questions-container"></div>
+    <div class="quiz-footer">
+      <button class="btn-nav primary" id="btn-evaluate" onclick="evaluateQuiz()" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Evaluar
+      </button>
+    </div>
+  </div>
+  <div id="screen-result"></div>
+</div>
+
+<script>
+const QUIZ_CONFIG = {
+meta: {
+  pageTitle:   "Quiz — Mecánica Básica",
+  logoLabel:   "Mecánica Básica",
+  heroTag:     "Unidades 1 & 2 · 44 preguntas",
+  heroTitle:   ["Mecánica", "<em>Básica</em>", "— Prueba"],
+  description: "Evalúa tu conocimiento sobre los sistemas principales del automóvil: motor, alimentación, refrigeración, transmisión, eléctrico, frenos y suspensión.",
+},
+source: {
+  label:    "Fuente del material",
+  title:    "Mecánica Básica — Módulo 2",
+  subtitle: "Unidades 1 & 2: El Automóvil y Sistemas",
+  pages:    "Cuestionario oficial del Sindicato",
+  note:     "Basado en el material de formación para conductores profesionales.",
+},
+topics: [
+  "El automóvil",
+  "Motor y ciclos",
+  "Sistema de alimentación",
+  "Lubricación",
+  "Refrigeración",
+  "Transmisión",
+  "Sistema eléctrico",
+  "Frenos",
+  "Suspensión y neumáticos",
+],
+grading: [
+  { min: 90, label: "¡Excelente!",       color: "#22C47A" },
+  { min: 70, label: "Muy bien",           color: "#4F8EF7" },
+  { min: 50, label: "Aprobado",           color: "#F5A623" },
+  { min:  0, label: "Sigue practicando", color: "#FF5A5A" },
+],
+questions: [
+  { section: "El automóvil", q: "¿Qué es un automóvil?", opts: ["También conocido como auto o vehículo, está compuesto por varios sistemas motrices que ayudan a trabajar de forma eficiente", "Es una máquina que cumple la función de apoyar a las personas con diferentes necesidades", "Ayuda a transportar solo pasajeros de un punto a otro", "Es únicamente un medio de transporte de carga"], ans: 0, exp: "Un automóvil es también conocido como auto o vehículo, y está compuesto por varios sistemas motrices que ayudan a trabajar de forma eficiente.", ref: { page: 1, section: "El Automóvil", detail: "Definición general" } },
+  { section: "El automóvil", q: "Señale los sistemas que componen un vehículo", opts: ["Puertas, ventanas, asientos, compuerta", "Chasis, motor, transmisión, sistema de dirección, freno y suspensión", "Guardachoques, capós, depósitos, testigos", "Carrocería, cristales, espejos y luces"], ans: 1, exp: "Los sistemas principales que componen un vehículo son: chasis, motor, transmisión, sistema de dirección, freno y suspensión.", ref: { page: 2, section: "El Automóvil", detail: "Sistemas principales del vehículo" } },
+  { section: "El automóvil", q: "¿Qué tipo de carrocería es conocida como Bivolumen?", opts: ["El vehículo que tiene dos volúmenes diferenciados: uno para el motor y otro para el habitáculo", "El vehículo que puede cargar más de 8 pasajeros y solo sirve para servicio de pasajeros", "El vehículo que tiene tres volúmenes claramente diferenciados", "Ninguna de las anteriores"], ans: 0, exp: "Un Bivolumen es el vehículo que tiene dos volúmenes diferenciados: uno para el motor y otro para el habitáculo.", ref: { page: 3, section: "El Automóvil", detail: "Tipos de carrocería" } },
+  { section: "El automóvil", q: "¿Qué es un mantenimiento automotriz?", opts: ["Es la actividad que se realiza en un vehículo para mejorar la función específica de un elemento sin importar su costo", "Permite mejorar la función y su vida útil disminuye cada vez que se realiza", "Es el conjunto de actividades y procedimientos que se realizan en un vehículo para garantizar su correcto funcionamiento, seguridad y durabilidad", "Es solo para reparar averías graves del motor"], ans: 2, exp: "El mantenimiento automotriz es el conjunto de actividades y procedimientos que se realizan en un vehículo para garantizar su correcto funcionamiento, seguridad y durabilidad.", ref: { page: 4, section: "Mantenimiento", detail: "Definición de mantenimiento automotriz" } },
+  { section: "El automóvil", q: "Señale el ejemplo correcto sobre un mantenimiento correctivo", opts: ["Reparación o cambio de motor", "Reparación de neumáticos en carretera", "Reparación de frenos desgastados", "Cambio de aceite programado"], ans: 2, exp: "El mantenimiento correctivo es la reparación de frenos desgastados, realizada cuando ya existe una falla.", ref: { page: 5, section: "Mantenimiento", detail: "Tipos de mantenimiento" } },
+  { section: "Motor", q: "¿Cómo se clasifican los motores según la disposición de sus cilindros?", opts: ["Solo en línea", "En línea, en V y opuestos", "Solo en V", "En diagonal únicamente"], ans: 1, exp: "Los motores se clasifican según la disposición de sus cilindros en: disposición en línea, disposición en V y disposición opuesta.", ref: { page: 6, section: "Motor", detail: "Disposición de cilindros" } },
+  { section: "Motor", q: "¿Cuáles son los elementos MÓVILES del motor?", opts: ["Bloque, cabezote, carter", "Cigüeñal, bloque, pistón", "Cigüeñal, biela, pistón", "Solo el cigüeñal y la biela"], ans: 2, exp: "Los elementos móviles del motor son: cigüeñal, biela y pistón. El bloque, cabezote y cárter son elementos fijos.", ref: { page: 7, section: "Motor", detail: "Componentes móviles y fijos" } },
+  { section: "Motor", q: "¿Cuáles son las fases de funcionamiento de un motor?", opts: ["Escape, admisión, explosión, compresión", "Admisión, explosión, escape, compresión", "Admisión, compresión, explosión, escape", "Compresión, admisión, escape, explosión"], ans: 2, exp: "Las fases de funcionamiento de un motor son: admisión, compresión, explosión (combustión) y escape.", ref: { page: 8, section: "Motor", detail: "Ciclo de cuatro tiempos" } },
+  { section: "Motor", q: "Un motor cuenta con válvulas de admisión y escape para:", opts: ["Permitir la entrada y evacuación del combustible", "Permitir que el aceite lubricante actúe dentro del cilindro", "Permitir la admisión de mezcla y escape de gases quemados desde el cilindro", "Ninguna de las anteriores"], ans: 2, exp: "Las válvulas de admisión permiten que entre la mezcla aire-combustible al cilindro, y las de escape permiten que salgan los gases quemados.", ref: { page: 9, section: "Motor", detail: "Válvulas de motor" } },
+  { section: "Motor", q: "El pistón dentro de un motor tiene como función:", opts: ["Absorber y transmitir las fuerzas producto de la combustión hacia el eje cigüeñal", "Encender la mezcla aire-combustible", "Regular la temperatura de ignición del combustible", "Almacenar los gases de la combustión"], ans: 0, exp: "El pistón absorbe y transmite las fuerzas producto de la combustión hacia el eje cigüeñal a través de la biela.", ref: { page: 10, section: "Motor", detail: "Función del pistón" } },
+  { section: "Sistema de alimentación", q: "¿Cuál es la misión del sistema de alimentación de un vehículo?", opts: ["Su propósito principal es suministrar la cantidad adecuada de combustible y aire en el motor para que se produzca la combustión", "Su propósito es de encender el vehículo para tener marcha y mejorar su rendimiento al momento de recorrer", "Es el encargado de insertar gasolina a los cilindros para que estos funcionen con aire dentro de la combustión", "Controlar la temperatura del motor"], ans: 0, exp: "La misión del sistema de alimentación es suministrar la cantidad adecuada de combustible y aire en el motor para que se produzca la combustión.", ref: { page: 11, section: "Alimentación", detail: "Misión del sistema" } },
+  { section: "Sistema de alimentación", q: "Los principales tipos de sistemas de alimentación son:", opts: ["Carburador y filtro", "Carburador, inyección electrónica e inyección diésel", "Solo inyección electrónica", "Bomba de gasolina solamente"], ans: 1, exp: "Los principales tipos de sistemas de alimentación son: carburador (tradicional), inyección electrónica (multipunto/monopunto) e inyección diésel.", ref: { page: 12, section: "Alimentación", detail: "Tipos de sistemas" } },
+  { section: "Sistema de alimentación", q: "Identifique los elementos del sistema de arranque", opts: ["Batería, bobina, cables, distribuidor, bujías", "Batería, motor de arranque, switch de encendido", "Pistones, bielas, cigüeñal", "Filtro de aire, carburador, inyectores"], ans: 1, exp: "Los elementos principales del sistema de arranque son: batería, motor de arranque y switch de encendido.", ref: { page: 13, section: "Arranque", detail: "Componentes del arranque" } },
+  { section: "Lubricación", q: "¿Cuáles son las características de aceite?", opts: ["Reduce la fricción, refrigeración, lubricación", "Limpieza, mejora el rendimiento del combustible", "Limpieza del combustible, mejor aceleración del motor", "Solo reduce temperatura"], ans: 0, exp: "Las características principales del aceite son: reduce la fricción entre piezas, proporciona refrigeración y actúa como lubricante.", ref: { page: 14, section: "Lubricación", detail: "Características del aceite" } },
+  { section: "Lubricación", q: "Al encenderse la luz roja indicadora de presión de aceite se debe:", opts: ["Continuar la marcha normalmente", "Detener inmediatamente el vehículo y el motor", "Continuar muy lentamente", "Aumentar las revoluciones"], ans: 1, exp: "Si se enciende la luz roja de presión de aceite, debe detener inmediatamente el vehículo y el motor para evitar daños.", ref: { page: 15, section: "Lubricación", detail: "Indicadores de avería" } },
+  { section: "Lubricación", q: "¿Qué significa las siglas SAE en los aceites?", opts: ["Asociación de vehículos del austro", "Asociación de camiones pesados", "Sociedad de Ingenieros Automotrices", "Sistema de clasificación europea"], ans: 2, exp: "SAE significa Society of Automotive Engineers (Sociedad de Ingenieros Automotrices) y clasifica la viscosidad del aceite.", ref: { page: 16, section: "Lubricación", detail: "Clasificación SAE" } },
+  { section: "Refrigeración", q: "Los componentes principales del sistema de refrigeración son:", opts: ["Solo el radiador", "Radiador, termostato, bomba de agua, camisas, ventilador y cañerías", "Compresor y evaporador", "Filtro de aire y conductos"], ans: 1, exp: "Los componentes del sistema de refrigeración incluyen: radiador, termostato, bomba de agua, camisas de agua, ventilador y cañerías.", ref: { page: 17, section: "Refrigeración", detail: "Componentes del sistema" } },
+  { section: "Refrigeración", q: "Señale las averías más comunes del sistema de refrigeración", opts: ["Consumo excesivo de combustible solamente", "Sobrecalentamiento del motor, termostato defectuoso, testigos encendidos por falla en el sistema", "Solo ruidos al acelerar", "Neumáticos con temperaturas elevadas"], ans: 1, exp: "Las averías más comunes del sistema de refrigeración son: sobrecalentamiento del motor, termostato defectuoso y testigos encendidos.", ref: { page: 18, section: "Refrigeración", detail: "Averías comunes" } },
+  { section: "Refrigeración", q: "¿Qué hace el radiador?", opts: ["Impulsa el agua o refrigerante hacia el motor", "Convierte el agua en refrigerante y detergente con el aire", "Enfría el agua o refrigerante con el aire que pasa por los paneles", "Almacena el combustible"], ans: 2, exp: "El radiador enfría el agua o refrigerante con el aire que pasa por sus paneles, disminuyendo la temperatura del motor.", ref: { page: 19, section: "Refrigeración", detail: "Función del radiador" } },
+  { section: "Refrigeración", q: "Una de las causas de que el motor de arranque no funcione es:", opts: ["Cables de las bujías desconectados", "Bobina en mal estado", "Bornes de la batería sulfatados", "Filtro de aire obstruido"], ans: 2, exp: "Los bornes de la batería sulfatados impiden el paso de corriente y pueden impedir que el motor de arranque funcione.", ref: { page: 20, section: "Refrigeración", detail: "Diagnóstico de fallas" } },
+  { section: "Refrigeración", q: "En caso de que la tapa del radiador explote, ¿qué acción debe realizar?", opts: ["Detiene el vehículo y pide auxilio mecánico", "Pone agua y continúa", "Tapa con franela y continúa", "No hacer nada"], ans: 0, exp: "Si la tapa del radiador explota, debe detener el vehículo inmediatamente y solicitar auxilio mecánico para evitar daños mayores.", ref: { page: 21, section: "Refrigeración", detail: "Procedimiento de seguridad" } },
+  { section: "Transmisión", q: "¿Para qué sirve el sistema de transmisión?", opts: ["Transmitir la potencia del motor a las ruedas delanteras", "Transmitir la potencia del motor a las ruedas motrices", "Transmitir la potencia del motor a las ruedas traseras", "Solo para vehículos de carga"], ans: 1, exp: "El sistema de transmisión transmite la potencia del motor a las ruedas motrices (pueden ser delanteras o traseras según el tipo de tracción).", ref: { page: 22, section: "Transmisión", detail: "Función del sistema" } },
+  { section: "Transmisión", q: "¿Qué elementos componen el Sistema de Transmisión?", opts: ["Embrague, Caja de Cambios, y el Grupo Cónico del Diferencial", "Embrague, Caja de Cambios, Árbol Propulsor o Cardán, y el Grupo Cónico del Diferencial", "Solo el embrague y la caja de cambios", "Ruedas, llantas y ejes"], ans: 1, exp: "El sistema de transmisión está compuesto por: embrague, caja de cambios, árbol propulsor (cardán) y grupo cónico del diferencial.", ref: { page: 23, section: "Transmisión", detail: "Componentes del sistema" } },
+  { section: "Transmisión", q: "La función del embrague es:", opts: ["Frenar el motor del vehículo", "Darle fuerza al motor del vehículo", "Conectar y desconectar la fuerza del motor a la caja de velocidades", "Cambiar las marchas"], ans: 2, exp: "La función del embrague es conectar y desconectar la fuerza del motor a la caja de velocidades, permitiendo cambiar de marcha sin dañar el sistema.", ref: { page: 24, section: "Transmisión", detail: "Función del embrague" } },
+  { section: "Transmisión", q: "Cuando el conductor saca el pedal del embrague, pero el vehículo no se desplaza correctamente, la avería se conoce como:", opts: ["Agarre del Embrague", "Patinado del Embrague", "Fuga de líquido", "Rotura de cable"], ans: 1, exp: "El patinado del embrague ocurre cuando el vehículo no se desplaza correctamente al soltar el pedal debido a que el disco no agarra completamente.", ref: { page: 25, section: "Transmisión", detail: "Averías del embrague" } },
+  { section: "Transmisión", q: "¿Cuál es la función de la caja de cambios?", opts: ["Transmitir la velocidad del vehículo", "Cambiar las marchas del vehículo", "Multiplicar, desmultiplicar e invertir el giro del motor", "Conectar con el diferencial"], ans: 2, exp: "La caja de cambios tiene la función de multiplicar, desmultiplicar e invertir el giro del motor para adaptarlo a diferentes velocidades y condiciones.", ref: { page: 26, section: "Transmisión", detail: "Función de la caja de cambios" } },
+  { section: "Transmisión", q: "¿Cada qué kilometraje se cambia el aceite de la caja de cambios?", opts: ["25.000 km", "30.000 km", "10.000 km", "40.000 km"], ans: 1, exp: "El aceite de la caja de cambios se debe cambiar cada 30.000 km según el mantenimiento programado.", ref: { page: 27, section: "Transmisión", detail: "Mantenimiento de la caja" } },
+  { section: "Mantenimiento preventivo", q: "¿Qué elementos del vehículo debe revisar antes de emprender un viaje?", opts: ["Agua radiador, líquido de frenos, agua de batería, aceite de motor, luces, agua de plumas, presión en los neumáticos", "Líquido de frenos, aceite de motor, luces, agua de plumas, presión en los neumáticos, radio, cigarrera", "Agua, líquido de frenos, agua de batería, aceite de motor, presión en los neumáticos, sistema de escape, nivel de combustible", "Solo el combustible y las luces"], ans: 0, exp: "Antes de emprender un viaje es importante revisar: agua del radiador, líquido de frenos, agua de batería, aceite de motor, luces, agua de plumas y presión de neumáticos.", ref: { page: 28, section: "Mantenimiento", detail: "Revisión previa" } },
+  { section: "Suspensión y neumáticos", q: "Indique los componentes del sistema de Suspensión", opts: ["Ballesta, Barras de torsión, Espirales, Radiador", "Paquetes, Muelles, Amortiguadores, Barra de torsión", "Bomba de agua, Bomba de aceite, Espirales, Termostato", "Cilindros y pistones"], ans: 1, exp: "Los componentes del sistema de suspensión son: paquetes, muelles, amortiguadores y barra de torsión.", ref: { page: 29, section: "Suspensión", detail: "Componentes del sistema" } },
+  { section: "Mantenimiento preventivo", q: "¿Cada qué kilometraje se debe inspeccionar el sistema de frenos?", opts: ["Cada 10.000 km", "Cada 20.000 km", "Cada 30.000 km", "Cada 5.000 km"], ans: 1, exp: "El sistema de frenos debe inspeccionarse cada 20.000 km para garantizar su correcto funcionamiento y seguridad.", ref: { page: 30, section: "Mantenimiento", detail: "Mantenimiento de frenos" } },
+  { section: "Sistema eléctrico", q: "¿Cuál es la función del motor Arranque?", opts: ["Por medio del motor de arranque se producen los primeros giros del cigüeñal para iniciar el funcionamiento del motor", "Por medio del motor de arranque se produce la carga de la batería constantemente", "Para controlar el voltaje del sistema", "Solo para pitar"], ans: 0, exp: "La función del motor de arranque es producir los primeros giros del cigüeñal para iniciar el funcionamiento del motor.", ref: { page: 31, section: "Sistema eléctrico", detail: "Motor de arranque" } },
+  { section: "Sistema eléctrico", q: "¿Cuál es el elemento básico para el funcionamiento del sistema de arranque?", opts: ["La Batería", "El alternador", "Platino y condensador", "El distribuidor"], ans: 0, exp: "La batería es el elemento básico para el funcionamiento del sistema de arranque, proporcionando la corriente necesaria.", ref: { page: 32, section: "Sistema eléctrico", detail: "Componentes básicos" } },
+  { section: "Sistema eléctrico", q: "¿Qué trabajo realiza el alternador?", opts: ["Alternar la corriente entre continua y alterna en el vehículo", "Generar el voltaje y amperaje necesario para el sistema eléctrico y cargar la batería", "Suministrar la luz eléctrica para encender los faros, radio, plumas", "Solo para el arranque"], ans: 1, exp: "El alternador genera el voltaje y amperaje necesario para el sistema eléctrico del vehículo y carga la batería mientras el motor está en funcionamiento.", ref: { page: 33, section: "Sistema eléctrico", detail: "Función del alternador" } },
+  { section: "Sistema eléctrico", q: "¿Qué es la batería?", opts: ["Acumulador de corriente", "Generador de corriente", "Distribuidor de corriente", "Acumulador y distribuidor de corriente"], ans: 3, exp: "La batería es un acumulador de corriente que almacena energía y la distribuye al sistema eléctrico cuando es necesaria.", ref: { page: 34, section: "Sistema eléctrico", detail: "La batería" } },
+  { section: "Sistema eléctrico", q: "En un vehículo con tracción delantera, ¿dónde están ubicados el motor y el diferencial?", opts: ["Motor al frente, diferencial en las ruedas traseras", "Motor y diferencial integrados en el eje delantero", "Motor al frente, diferencial central", "Motor al frente, no tiene diferencial"], ans: 1, exp: "En un vehículo con tracción delantera, el motor y el diferencial están integrados en el eje delantero para propulsar las ruedas delanteras.", ref: { page: 35, section: "Sistema eléctrico", detail: "Tracción delantera" } },
+  { section: "Frenos", q: "¿Cuál es la función principal del sistema de frenos?", opts: ["Es la de mantener una velocidad constante con diferentes revoluciones del motor", "Es detenerlo o reducir su velocidad de manera controlada", "Es detener con un solo golpe la aceleración del motor para no provocar un accidente", "Es solo para estacionarse"], ans: 1, exp: "La función principal del sistema de frenos es detener o reducir la velocidad del vehículo de manera controlada y segura.", ref: { page: 36, section: "Frenos", detail: "Función del sistema" } },
+  { section: "Frenos", q: "¿A qué sistema pertenecen los frenos de tambor y disco?", opts: ["Sistema de suspensión", "Sistema de transmisión", "Sistema de frenos", "Sistema de dirección"], ans: 2, exp: "Los frenos de tambor y disco pertenecen al sistema de frenos, siendo dos tipos diferentes de frenos hidráulicos.", ref: { page: 37, section: "Frenos", detail: "Tipos de frenos" } },
+  { section: "Frenos", q: "¿A qué sistema pertenecen las zapatas?", opts: ["Dirección", "Suspensión", "Frenos", "Motor"], ans: 2, exp: "Las zapatas pertenecen al sistema de frenos, especialmente en los frenos de tambor donde actúan como elemento de frenado.", ref: { page: 38, section: "Frenos", detail: "Componentes del freno" } },
+  { section: "Suspensión y neumáticos", q: "Señale las características principales que debe tener una suspensión", opts: ["Mejorar rendimiento al conducir y al frenar", "Fricción, rozamiento, mejor desempeño en tracción", "Amortiguación, rigidez, elasticidad, estabilidad y suavidad", "Solo resistencia"], ans: 2, exp: "Las características principales de una suspensión son: amortiguación, rigidez, elasticidad, estabilidad y suavidad para un viaje cómodo y seguro.", ref: { page: 39, section: "Suspensión", detail: "Características" } },
+  { section: "Suspensión y neumáticos", q: "El exceso de inflado en un neumático produce:", opts: ["Desgaste en los bordes de la banda de rodamiento", "Desgaste en el centro de la banda de rodamiento del neumático", "Deterioro de la válvula de inflado", "Mayor tracción"], ans: 1, exp: "El exceso de inflado en un neumático produce desgaste acelerado en el centro de la banda de rodamiento debido a la mayor presión en el punto central.", ref: { page: 40, section: "Neumáticos", detail: "Inflado de neumáticos" } },
+  { section: "Suspensión y neumáticos", q: "El desgaste disparejo de los neumáticos delanteros se debe a:", opts: ["Exceso de velocidad en zona de curvas", "Exceso de peso en el vehículo", "Deficiente alineación del tren delantero y/o desgaste de amortiguadores", "Falta de aire"], ans: 2, exp: "El desgaste disparejo de los neumáticos delanteros es causado principalmente por deficiente alineación del tren delantero o desgaste de los amortiguadores.", ref: { page: 41, section: "Neumáticos", detail: "Diagnóstico de desgaste" } },
+  { section: "Diagnóstico", q: "¿Cuándo sale humo azul del motor de su vehículo a gasolina, qué significa?", opts: ["Consumo de agua o refrigerante", "Consumo de combustible", "Consumo de aceite", "Baja compresión"], ans: 2, exp: "Humo azul del motor indica consumo de aceite, que se está quemando dentro del cilindro junto con la mezcla combustible.", ref: { page: 42, section: "Diagnóstico", detail: "Humo azul" } },
+  { section: "Diagnóstico", q: "¿Cuándo sale humo blanco del motor de su vehículo a gasolina, qué significa?", opts: ["Baja temperatura del motor y consumo de agua o refrigerante", "Consumo de combustible", "Consumo excesivo de aceite", "Inyectores defectuosos"], ans: 0, exp: "Humo blanco del motor indica baja temperatura del motor y consumo de agua o refrigerante, que se está evaporando en los cilindros.", ref: { page: 43, section: "Diagnóstico", detail: "Humo blanco" } },
+  { section: "Diagnóstico", q: "¿Cuándo sale humo negro del motor de su vehículo a gasolina, qué significa?", opts: ["Baja temperatura del motor", "Consumo excesivo de combustible", "Consumo de agua o refrigerante", "Consumo de aceite"], ans: 1, exp: "Humo negro del motor indica consumo excesivo de combustible, que no está siendo quemado completamente en los cilindros.", ref: { page: 44, section: "Diagnóstico", detail: "Humo negro" } },
+]
+};
+
+let answers = {};
+
+function initQuiz() {
+  document.title = QUIZ_CONFIG.meta.pageTitle;
+  renderIntro();
+}
+
+function renderIntro() {
+  const intro = document.getElementById('screen-intro');
+  const { meta, source, topics, questions } = QUIZ_CONFIG;
+
+  intro.innerHTML = `
+    <div class="breadcrumb">
+      <a class="breadcrumb-link" href="../index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Portal
+      </a>
+      <span class="breadcrumb-separator">/</span>
+      <span style="font-size:12px;color:var(--text)">${meta.logoLabel}</span>
+    </div>
+    <div class="logo-row">
+      <div class="logo-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      </div>
+      <div class="logo-text">${meta.logoLabel}</div>
+    </div>
+    <div class="hero-tag">${meta.heroTag}</div>
+    <h1 class="hero-title">${meta.heroTitle.join(' ')}</h1>
+    <p class="hero-desc">${meta.description}</p>
+    <div class="stats-row">
+      <div class="stat"><span class="stat-num">${questions.length}</span><span class="stat-lbl">Preguntas</span></div>
+      <div class="stat"><span class="stat-num">${topics.length}</span><span class="stat-lbl">Temas</span></div>
+    </div>
+    <div class="topics">${topics.map(t => `<div class="topic-chip"><div class="topic-dot"></div>${t}</div>`).join('')}</div>
+    <div class="source-box">
+      <strong>${source.label}</strong>
+      ${source.title}<br/>
+      <small style="color:rgba(165,232,181,0.8)">${source.subtitle}</small>
+    </div>
+    <button class="btn-start" onclick="startQuiz()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Comenzar prueba
+    </button>
+  `;
+}
+
+function startQuiz() {
+  document.getElementById('screen-intro').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'block';
+  renderAllQuestions();
+  updateProgress();
+  window.scrollTo(0, 0);
+}
+
+function renderAllQuestions() {
+  const container = document.getElementById('questions-container');
+  container.innerHTML = QUIZ_CONFIG.questions.map((q, i) => `
+    <div class="question-card ${answers[i] !== undefined ? 'answered' : ''}" id="qcard-${i}">
+      <div class="q-meta">
+        <span class="q-num-badge">P${i+1}</span>
+        <div class="section-tag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:10px;height:10px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          ${q.section}
+        </div>
+      </div>
+      <h2 class="q-title">${q.q}</h2>
+      <div class="options">
+        ${q.opts.map((opt, j) => `
+          <div class="opt ${answers[i] === j ? 'selected' : ''}" onclick="answerQuestion(${i}, ${j})">
+            <div class="opt-radio"></div>
+            <div class="opt-text">${opt}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function answerQuestion(qIdx, optIdx) {
+  answers[qIdx] = optIdx;
+  const card = document.getElementById('qcard-' + qIdx);
+  card.classList.add('answered');
+  card.querySelectorAll('.opt').forEach((el, j) => {
+    el.classList.toggle('selected', j === optIdx);
+  });
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = Object.keys(answers).length;
+  const total = QUIZ_CONFIG.questions.length;
+  document.getElementById('prog-count').textContent = `${answered} / ${total}`;
+  document.getElementById('prog-fill').style.width = Math.round((answered/total)*100) + '%';
+  document.getElementById('btn-evaluate').disabled = answered < total;
+}
+
+function evaluateQuiz() {
+  if (Object.keys(answers).length < QUIZ_CONFIG.questions.length) {
+    alert('Por favor responde todas las preguntas antes de evaluar');
+    return;
+  }
+  renderResult();
+}
+
+function renderResult() {
+  document.getElementById('screen-quiz').style.display = 'none';
+  document.getElementById('screen-result').style.display = 'block';
+
+  let correctCount = 0;
+  QUIZ_CONFIG.questions.forEach((q, i) => {
+    if (answers[i] === q.ans) correctCount++;
+  });
+
+  const total = QUIZ_CONFIG.questions.length;
+  const pct = Math.round((correctCount / total) * 100);
+  const gradeObj = QUIZ_CONFIG.grading.find(g => pct >= g.min);
+
+  const result = document.getElementById('screen-result');
+  const circumference = 2 * Math.PI * 85;
+  const strokeDashoffset = circumference - (pct / 100) * circumference;
+
+  let reviewHTML = '';
+  QUIZ_CONFIG.questions.forEach((q, i) => {
+    const isCorrect = answers[i] === q.ans;
+    const userAns = q.opts[answers[i]];
+    const correctAns = q.opts[q.ans];
+
+    reviewHTML += `
+      <div class="review-card">
+        <div class="review-header">
+          <div class="review-q">P${i + 1}: ${q.q}</div>
+        </div>
+        <div class="review-answers">
+          <span class="ans-label">Tu respuesta:</span>
+          <div class="${isCorrect ? 'ans-correct' : 'ans-wrong'}">${userAns || '(no respondida)'}</div>
+          ${!isCorrect ? `<span class="ans-label">Respuesta correcta:</span><div class="ans-correct">${correctAns}</div>` : ''}
+          <div class="ans-exp">${q.exp}</div>
+          <div class="ref-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            Pág. ${q.ref.page} · ${q.ref.section}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  result.innerHTML = `
+    <a class="breadcrumb-back" href="../index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Volver al portal
+    </a>
+    <div class="result-hero">
+      <div class="score-ring">
+        <svg viewBox="0 0 180 180">
+          <circle class="track" cx="90" cy="90" r="85"/>
+          <circle class="ring-fill" cx="90" cy="90" r="85" stroke="${gradeObj.color}" style="stroke-dasharray:${circumference};stroke-dashoffset:${strokeDashoffset}"/>
+        </svg>
+        <div class="score-inner">
+          <div class="score-num">${correctCount}</div>
+          <div class="score-denom">/ ${total}</div>
+        </div>
+      </div>
+      <div class="result-label" style="color:${gradeObj.color}">${gradeObj.label}</div>
+      <div class="result-pct">${pct}% correcto</div>
+    </div>
+    <div class="result-stats">
+      <div class="rs">
+        <span class="rs-num" style="color:var(--green)">${correctCount}</span>
+        <span class="rs-lbl">Correctas</span>
+      </div>
+      <div class="rs">
+        <span class="rs-num" style="color:var(--red)">${total - correctCount}</span>
+        <span class="rs-lbl">Incorrectas</span>
+      </div>
+      <div class="rs">
+        <span class="rs-num">${pct}%</span>
+        <span class="rs-lbl">Porcentaje</span>
+      </div>
+    </div>
+    <div style="margin-top:2rem">${reviewHTML}</div>
+    <div class="result-actions">
+      <button class="btn-nav" onclick="retryQuiz()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2-8.83"/></svg>
+        Reintentar
+      </button>
+      <button class="btn-nav primary" onclick="goHome()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Volver al portal
+      </button>
+    </div>
+  `;
+  window.scrollTo(0, 0);
+}
+
+function retryQuiz() {
+  answers = {};
+  document.getElementById('screen-result').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'block';
+  renderAllQuestions();
+  updateProgress();
+  window.scrollTo(0, 0);
+}
+
+function goHome() {
+  window.location.href = '../index.html';
+}
+
+initQuiz();
+</script>
+</body>
+</html>

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="page-title">Quiz — Teoría de la Conducción</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0D0F14; --surface:#161A23; --surface2:#1E2330;
+    --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.14);
+    --accent:#4F8EF7; --accent2:#3A6FDB;
+    --text:#F0F2F8; --muted:#7A8099;
+    --green:#22C47A; --green-bg:rgba(34,196,122,0.12);
+    --red:#FF5A5A; --red-bg:rgba(255,90,90,0.12);
+    --blue:#4F8EF7; --blue-bg:rgba(79,142,247,0.12);
+    --amber:#F5A623; --amber-bg:rgba(245,166,35,0.12);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(79,142,247,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(79,142,247,0.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+  .glow{position:fixed;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(79,142,247,0.06) 0%,transparent 70%);top:-200px;right:-200px;pointer-events:none;z-index:0}
+  .container{max-width:1200px;margin:0 auto;padding:2rem 1.5rem 4rem;position:relative;z-index:1}
+
+  /* INTRO */
+  #screen-intro{animation:fadeUp .5s ease both}
+  .breadcrumb{display:flex;align-items:center;gap:8px;margin-bottom:2rem}
+  .breadcrumb-link{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);text-decoration:none;cursor:pointer;transition:color .15s}
+  .breadcrumb-link:hover{color:var(--text)}
+  .breadcrumb-separator{color:var(--border);margin:0 4px}
+  .logo-row{display:flex;align-items:center;gap:12px;margin-bottom:2rem}
+  .logo-badge{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center}
+  .logo-badge svg{width:20px;height:20px}
+  .logo-text{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .hero-tag{display:inline-block;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(79,142,247,.3);padding:4px 12px;border-radius:20px;margin-bottom:1.5rem}
+  .hero-title{font-family:'Syne',sans-serif;font-size:clamp(32px,6vw,52px);font-weight:800;line-height:1.1;letter-spacing:-.02em;margin-bottom:1rem}
+  .hero-title em{font-style:normal;color:var(--accent)}
+  .hero-desc{font-size:16px;color:var(--muted);line-height:1.7;max-width:540px;margin-bottom:2.5rem}
+  .stats-row{display:flex;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:2.5rem}
+  .stat{flex:1;background:var(--surface);padding:1rem 1.25rem;text-align:center}
+  .stat-num{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--text);display:block}
+  .stat-lbl{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:2px;display:block}
+  .topics{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin-bottom:2.5rem}
+  .topic-chip{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+  .topic-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+  .source-box{background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.2);border-radius:10px;padding:14px 16px;font-size:13px;color:#8BB8FA;margin-bottom:2.5rem;line-height:1.6}
+  .source-box strong{color:#B3D0FC;font-weight:500;display:block;margin-bottom:4px}
+  .btn-start{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:#0D0F14;border:none;border-radius:10px;padding:14px 28px;font-family:'Syne',sans-serif;font-size:15px;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:transform .15s,background .15s}
+  .btn-start:hover{background:var(--accent2);transform:translateY(-2px)}
+  .btn-start svg{width:18px;height:18px}
+
+  /* QUIZ - LIST VIEW */
+  #screen-quiz{display:none;animation:fadeUp .3s ease both}
+  .quiz-header{margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+  .progress-wrap{margin-bottom:1rem}
+  .progress-info{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px;color:var(--muted)}
+  .progress-info strong{color:var(--accent)}
+  .progress-bar{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden}
+  .progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease}
+  .questions-container{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:1.5rem;margin-bottom:2rem}
+  .question-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.75rem;animation:fadeUp .3s ease}
+  .question-card.answered{border-color:var(--accent)}
+  .q-meta{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+  .q-num-badge{font-family:Syne;font-size:12px;color:var(--muted)}
+  .section-tag{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:rgba(79,142,247,.1);border:1px solid rgba(79,142,247,.2);padding:3px 10px;border-radius:20px}
+  .q-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:1.5rem;line-height:1.4}
+  .options{display:flex;flex-direction:column;gap:12px}
+  .opt{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s;user-select:none}
+  .opt:hover{border-color:var(--border2);background:rgba(79,142,247,.05)}
+  .opt.selected{border-color:var(--accent);background:rgba(79,142,247,.08)}
+  .opt-radio{width:18px;height:18px;min-width:18px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;margin-top:2px}
+  .opt.selected .opt-radio{border-color:var(--accent);background:var(--accent)}
+  .opt.selected .opt-radio::after{content:'';width:6px;height:6px;background:#0D0F14;border-radius:50%}
+  .opt-text{font-size:14px;line-height:1.5;color:var(--text)}
+  .quiz-footer{max-width:760px;margin:2rem auto;text-align:right}
+  .btn-nav{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:.04em;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--muted);transition:all .2s}
+  .btn-nav:hover{background:var(--surface2);color:var(--text);border-color:var(--border2)}
+  .btn-nav.primary{background:var(--accent);color:#0D0F14;border-color:var(--accent)}
+  .btn-nav.primary:hover{background:var(--accent2)}
+  .btn-nav.primary:disabled{opacity:.4;cursor:not-allowed}
+  .btn-nav svg{width:16px;height:16px}
+
+  /* RESULT */
+  #screen-result{display:none;animation:fadeUp .5s ease both}
+  .result-hero{text-align:center;padding:3rem 0;margin-bottom:2rem}
+  .score-ring{position:relative;width:180px;height:180px;margin:0 auto 2rem}
+  .score-ring svg{width:180px;height:180px;transform:rotate(-90deg)}
+  .score-ring .track{fill:none;stroke:var(--surface2);stroke-width:10}
+  .ring-fill{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1.2s ease}
+  .score-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .score-num{font-family:'Syne',sans-serif;font-size:48px;font-weight:800;line-height:1}
+  .score-denom{font-size:13px;color:var(--muted);margin-top:4px}
+  .result-label{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;margin-bottom:8px}
+  .result-pct{font-size:16px;color:var(--muted);margin-bottom:2rem}
+  .result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  .rs{background:var(--surface);padding:1.5rem;text-align:center}
+  .rs-num{font-family:'Syne',sans-serif;font-size:28px;font-weight:700;display:block;margin-bottom:0.5rem}
+  .rs-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .result-quiz-layout{display:grid;grid-template-columns:280px 1fr;gap:2rem}
+  .review-sidebar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;height:fit-content;position:sticky;top:2rem;max-height:calc(100vh - 4rem);overflow-y:auto}
+  .review-list{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .review-number{width:100%;aspect-ratio:1;background:var(--surface2);border:2px solid transparent;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+  .review-number.correct{background:rgba(34,196,122,.15);border-color:var(--green);color:var(--green)}
+  .review-number.incorrect{background:rgba(255,90,90,.15);border-color:var(--red);color:var(--red)}
+  .review-number:hover{transform:scale(1.05)}
+  .review-content{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:2rem}
+  .review-item{margin-bottom:2rem}
+  .review-header{margin-bottom:1.5rem}
+  .review-q{font-family:'Syne',sans-serif;font-size:15px;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:1rem}
+  .review-answers{font-size:13px;line-height:1.8}
+  .ans-label{color:var(--muted);display:block;margin-bottom:0.3rem}
+  .ans-correct{color:var(--green);font-weight:600}
+  .ans-wrong{color:var(--red);font-weight:600}
+  .ans-exp{color:var(--muted);margin-top:0.8rem;font-size:12px;line-height:1.6;padding:0.8rem;background:rgba(79,142,247,.05);border-left:2px solid var(--accent);border-radius:4px}
+  .ref-pill{display:inline-flex;align-items:center;gap:6px;margin-top:1rem;background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.2);border-radius:6px;padding:6px 12px;font-size:11px;color:#A8CCFF}
+  .ref-pill svg{width:12px;height:12px}
+  .result-actions{display:flex;gap:12px;justify-content:center;margin-top:3rem}
+  .breadcrumb-back{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);text-decoration:none;cursor:pointer;margin-bottom:2rem;transition:color .2s}
+  .breadcrumb-back:hover{color:var(--text)}
+  .breadcrumb-back svg{width:14px;height:14px}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  @media(max-width:1024px){
+    .result-quiz-layout{grid-template-columns:1fr;gap:1.5rem}
+    .review-sidebar{position:static;max-height:none;margin-bottom:1.5rem}
+  }
+  @media(max-width:600px){
+    .container{padding:1.5rem 1rem 3rem}
+    .review-list{grid-template-columns:repeat(3,1fr)}
+    .question-card{padding:1.5rem}
+    .quiz-footer{text-align:center}
+    .btn-nav{width:100%;justify-content:center}
+  }
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="container">
+  <div id="screen-intro"></div>
+  <div id="screen-quiz">
+    <a class="breadcrumb-back" href="../index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Volver al portal
+    </a>
+    <div class="quiz-header">
+      <div class="progress-wrap">
+        <div class="progress-info"><span>Respondidas</span><strong id="prog-count">0 / 0</strong></div>
+        <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="questions-container" id="questions-container"></div>
+    <div class="quiz-footer">
+      <button class="btn-nav primary" id="btn-evaluate" onclick="evaluateQuiz()" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Evaluar
+      </button>
+    </div>
+  </div>
+  <div id="screen-result"></div>
+</div>
+
+<script>
+const QUIZ_CONFIG = {
+meta: {
+  pageTitle:   "Quiz — Teoría de la Conducción",
+  logoLabel:   "Teoría de la Conducción",
+  heroTag:     "Segundo Crédito · 57 preguntas",
+  heroTitle:   ["Conducción a la", "<em>Defensiva</em>"],
+  description: "Evalúa tu conocimiento sobre conducción defensiva, seguridad vial y manejo de emergencias en la carretera.",
+},
+source: {
+  label:    "Fuente del material",
+  title:    "Cuestionario de Teoría de la Conducción",
+  subtitle: "Segundo Crédito - Conducción Defensiva y Emergencias Viales",
+  pages:    "Material de capacitación",
+  note:     "Basado en normativas de seguridad vial y procedimientos de conducción defensiva.",
+},
+topics: [
+  "Conducción defensiva",
+  "Seguridad activa y pasiva",
+  "Errores en la conducción",
+  "Distancia de seguimiento",
+  "Emergencias viales",
+  "Incendio del vehículo",
+  "Neumáticos",
+  "Encandilamiento",
+  "Hipnosis de la ruta",
+  "Condiciones adversas",
+],
+grading: [
+  { min: 90, label: "¡Excelente!",       color: "#22C47A" },
+  { min: 70, label: "Muy bien",           color: "#4F8EF7" },
+  { min: 50, label: "Aprobado",           color: "#F5A623" },
+  { min:  0, label: "Sigue practicando", color: "#FF5A5A" },
+],
+questions: [
+  { section: "Conducción defensiva", q: "¿Qué significa conducción a la defensiva?", opts: ["El arte de promover la vida.", "El arte de preservar la vida.", "El arte de procurar la vida."], ans: 1, exp: "La conducción defensiva es el arte de preservar la vida, anticipando peligros y evitando accidentes." },
+  { section: "Seguridad activa y pasiva", q: "Los sistemas que forman parte de la seguridad pasiva son:", opts: ["Sistema de: frenos, suspensión, eléctrico.", "Cinturón de seguridad, embrague, cremallera, ESP.", "Cinturón de seguridad, airbag, apoyacabezas."], ans: 2, exp: "La seguridad pasiva incluye elementos como cinturón de seguridad, airbag y apoyacabezas que protegen en accidentes." },
+  { section: "Conducción defensiva", q: "¿Cuál es el objetivo principal de la conducción a la defensiva?", opts: ["Conseguir el máximo de seguridad.", "Respetar en todo momento las leyes de tránsito.", "Que el vehículo y los neumáticos no sufran mayor desgaste."], ans: 0, exp: "El objetivo principal es conseguir el máximo de seguridad para el conductor, pasajeros y otros usuarios." },
+  { section: "Conducción defensiva", q: "¿Conducir bajo los efectos del alcohol, drogas o medicamentos que producen somnolencia, afectan la conducción a la defensiva?", opts: ["Sí.", "No.", "Sólo si es en grandes cantidades."], ans: 0, exp: "Cualquier sustancia que afecte la concentración y reflejos compromete la conducción defensiva." },
+  { section: "Errores en la conducción", q: "De entre la lista, identifique cuál corresponde a un error en la conducción.", opts: ["Acatar las órdenes del Agente Civil de Tránsito.", "Revisar el correcto nivel de los depósitos de fluidos.", "Marcar un número o utilizar el teléfono celular."], ans: 2, exp: "Usar el teléfono celular al conducir es un error grave que distrae y compromete la seguridad." },
+  { section: "Errores en la conducción", q: "Las distracciones exteriores son:", opts: ["Quedarse mirando accidentes de tránsito.", "Mirar fijamente a un peatón y hacerle señas.", "Todas las anteriores."], ans: 2, exp: "Cualquier distracción exterior (accidentes, personas) reduce la atención en la conducción." },
+  { section: "Conducción defensiva", q: "En la conducción, uno de los deberes que debemos cumplir es:", opts: ["Verificar la luz del semáforo.", "Portar los documentos habilitantes.", "Distraer nuestra atención en la conducción."], ans: 1, exp: "Es obligatorio portar licencia de conducir y documentos del vehículo en todo momento." },
+  { section: "Seguridad activa y pasiva", q: "¿A qué tipo de seguridad se la conoce también como primaria?", opts: ["Seguridad pasiva.", "Seguridad activa.", "Ninguna de las anteriores."], ans: 1, exp: "La seguridad activa (frenos, dirección, suspensión) es conocida como seguridad primaria." },
+  { section: "Seguridad activa y pasiva", q: "La finalidad de la seguridad activa es:", opts: ["Evitar lesiones a los ocupantes del vehículo.", "Evitar multas de tránsito.", "Evitar accidentes de tránsito."], ans: 2, exp: "La seguridad activa busca evitar accidentes mediante sistemas como frenos, dirección y neumáticos." },
+  { section: "Seguridad activa y pasiva", q: "La misión de la seguridad pasiva es:", opts: ["Minimizar los daños del vehículo en caso de accidente.", "Evitar una multa de tránsito.", "Minimizar las consecuencias de un accidente de tránsito."], ans: 2, exp: "La seguridad pasiva protege a ocupantes en caso de accidente mediante cinturones, airbags, etc." },
+  { section: "Seguridad activa y pasiva", q: "¿Cuáles de los siguientes elementos son parte de la seguridad activa?", opts: ["Sistema de frenos ABS.", "Neumáticos.", "Todas las anteriores."], ans: 2, exp: "Tanto frenos ABS como neumáticos son componentes de la seguridad activa del vehículo." },
+  { section: "Conducción defensiva", q: "¿Reducir la velocidad es un buen hábito de la conducción a la defensiva?", opts: ["Sí.", "No.", "No sé."], ans: 0, exp: "Reducir la velocidad es fundamental en la conducción defensiva para mayor control y reacción." },
+  { section: "Conducción defensiva", q: "Las estadísticas de la ANT dicen que los accidentes de tránsito se dan por:", opts: ["90% por fallas humanas y 10% por causas de la naturaleza.", "50% por fallas humanas y 50% por causas de la naturaleza.", "10% por fallas humanas y 90% por causas de la naturaleza."], ans: 0, exp: "El 90% de accidentes son causados por errores humanos, confirmando la importancia de la conducción defensiva." },
+  { section: "Errores en la conducción", q: "Conducir con una sola mano:", opts: ["Es uno de los errores más comunes que cometen los conductores.", "Es la actitud de un conductor experimentado.", "Permite maniobrar fácilmente el volante."], ans: 0, exp: "Conducir con una sola mano es un error común que reduce el control del vehículo." },
+  { section: "Errores en la conducción", q: "Los errores más comunes al conducir son:", opts: ["No respetar los pasos peatonales.", "Hacer uso indebido de los neblineros.", "Todas las anteriores."], ans: 2, exp: "Los errores comunes incluyen no respetar peatones, mal uso de accesorios y otras conductas inseguras." },
+  { section: "Conducción defensiva", q: "Las técnicas de conducción defensiva:", opts: ["Permiten maniobrar perfectamente el volante.", "Generan conciencia en la conducción para disminuir las cifras de accidentes.", "Economizan el consumo de combustible."], ans: 1, exp: "La conducción defensiva genera conciencia y reduce significativamente los accidentes de tránsito." },
+  { section: "Conducción defensiva", q: "¿Cuáles, de las siguientes; son técnicas de conducción defensiva?", opts: ["Saber anticiparse.", "Visión periférica de 360 grados.", "Todas las anteriores."], ans: 2, exp: "Ambas técnicas (anticipación y visión periférica) son fundamentales en conducción defensiva." },
+  { section: "Conducción defensiva", q: "La visión periférica le permite:", opts: ["Escanear el camino.", "Mirar mejor por los espejos retrovisores.", "Tener más control del mando de las luces."], ans: 0, exp: "La visión periférica permite escanear continuamente el entorno para anticipar peligros." },
+  { section: "Distancia de seguimiento", q: "¿Cuando llueve intensamente, se recomienda aumentar la distancia de seguimiento?", opts: ["Sí.", "No.", "Solo si es de noche."], ans: 0, exp: "Con lluvia intensa se debe aumentar la distancia para mayor reacción ante frenadas." },
+  { section: "Distancia de seguimiento", q: "¿Cuál es la distancia de seguimiento recomendada?", opts: ["3 metros.", "3 segundos.", "3 minutos."], ans: 1, exp: "La distancia de seguimiento recomendada es de 3 segundos, adaptándose a la velocidad." },
+  { section: "Distancia de seguimiento", q: "La distancia de seguimiento de 3 segundos le permite:", opts: ["Reaccionar ante una situación inesperada.", "Mirar la placa del vehículo que va adelante.", "Mirar más lejos que los demás conductores."], ans: 0, exp: "3 segundos de distancia proporciona tiempo de reacción ante cualquier emergencia." },
+  { section: "Errores en la conducción", q: "Un conductor distraído es:", opts: ["Un conductor agresivo.", "Un conductor defensivo.", "No es un conductor defensivo."], ans: 2, exp: "La distracción es incompatible con la conducción defensiva y aumenta riesgos." },
+  { section: "Conducción defensiva", q: "Ante la presencia de conductores agresivos, ¿Qué se debe hacer?", opts: ["Cambiarse de carril y dejarlos pasar.", "No cederles el paso.", "Frenar para que el otro conductor vaya más despacio."], ans: 0, exp: "Ante conductores agresivos, lo seguro es ceder paso y mantener distancia." },
+  { section: "Conducción defensiva", q: "El mantenimiento regular del vehículo permite:", opts: ["Mejorar significativamente su desempeño.", "Comprar más barato los repuestos.", "Eliminar las paradas a mitad de camino."], ans: 0, exp: "El mantenimiento regular mejora el desempeño y previene fallos mecánicos." },
+  { section: "Emergencias viales", q: "Conducir sabiendo que hacer, cuándo hacerlo y cómo hacerlo, hace referencia a:", opts: ["Emergencias en la conducción.", "Rellenar el tanque de combustible.", "La rotación de los neumáticos."], ans: 0, exp: "Está descripción se refiere a tener preparación y conocimiento para emergencias." },
+  { section: "Emergencias viales", q: "Lo primordial ante una emergencia es:", opts: ["Evitar sanciones.", "Evitar que se destruya el vehículo.", "Mantener la calma."], ans: 2, exp: "Mantener la calma es esencial para pensar claramente y tomar decisiones correctas." },
+  { section: "Emergencias viales", q: "¿En caso de quedarse sin frenos, cuál sería la primera acción emergente?", opts: ["Buscar una superficie de rozamiento lateral.", "Utilizar el freno de estacionamiento rápida y progresivamente.", "Accionar el pedal del freno de forma rápida y frecuente."], ans: 2, exp: "Si fallan los frenos, bombear el pedal rápidamente puede restaurar presión parcialmente." },
+  { section: "Neumáticos", q: "¿Cómo puede darse cuenta que un neumático delantero está con baja presión?", opts: ["Golpea frecuentemente la carrocería.", "Hala el volante hacia el lado del neumático desinflado.", "Se detiene el vehículo."], ans: 1, exp: "La baja presión en delanteros hace que la dirección se desvíe hacia ese lado." },
+  { section: "Neumáticos", q: "¿Qué hacer cuando se revienta un neumático?", opts: ["Sujetar con firmeza el volante con las dos manos.", "Frenar bruscamente para detener el movimiento del vehículo.", "Girar rápidamente el volante hacia la derecha para detener el vehículo."], ans: 0, exp: "Al reventón se debe mantener control del volante con ambas manos." },
+  { section: "Emergencias viales", q: "¿Qué se debe hacer en caso de patinar el vehículo?", opts: ["Girar el volante en la misma dirección que se mueven las ruedas traseras al deslizarse.", "Frenar bruscamente.", "Mantener recta la dirección para que se detenga el vehículo."], ans: 0, exp: "En patinaje, girar en la misma dirección del deslizamiento restaura el control." },
+  { section: "Emergencias viales", q: "¿Qué hacer si viene un vehículo hacia usted en dirección contraria?", opts: ["Pitar y encender las luces.", "Detener la marcha del vehículo.", "Prender las luces de emergencia para advertir a los demás."], ans: 0, exp: "Pitar y encender luces alerta al otro conductor sobre la situación crítica." },
+  { section: "Incendio del vehículo", q: "¿Porqué puede producirse un incendio del vehículo?", opts: ["Por derrame de combustible sobre partes calientes.", "Por cortocircuitos.", "Todas las anteriores."], ans: 2, exp: "Los incendios pueden originarse por derrame de combustible o fallos eléctricos." },
+  { section: "Incendio del vehículo", q: "¿Qué se debe hacer en caso de incendio del vehículo?", opts: ["Ubique el vehículo fuera de la calzada.", "Hacer que salgan los ocupantes del vehículo a un lugar seguro.", "Todas las anteriores."], ans: 2, exp: "Tanto evacuar como apartar el vehículo son acciones prioritarias ante incendio." },
+  { section: "Incendio del vehículo", q: "En caso de incendio, se debe atacar el fuego directamente hacia:", opts: ["A la base del fuego.", "Al pico del fuego.", "A las partes secas."], ans: 0, exp: "Atacar la base del fuego corta el suministro de combustible y extingue más eficazmente." },
+  { section: "Incendio del vehículo", q: "¿Con qué se debe sofocar el fuego?", opts: ["Con extintor, tierra o arena.", "Con una manguera con agua.", "Todas las anteriores."], ans: 0, exp: "Usar extintor, tierra o arena es seguro; el agua puede ser contraproducente en algunos casos." },
+  { section: "Emergencias viales", q: "¿Porqué puede ocurrir una detención obligada en la noche?", opts: ["Por una avería del vehículo.", "Para descansar, porque me desvelé.", "Para conversar con un amigo de otro vehículo."], ans: 0, exp: "Una avería es la razón principal para detenerse obligadamente en la noche." },
+  { section: "Emergencias viales", q: "En caso de rotura del parabrisas, se aconseja:", opts: ["Seguir conduciendo con el parabrisas roto.", "Pedir al acompañante que lo guíe.", "Recuperar la visión por las ventanas."], ans: 2, exp: "Con parabrisas roto, recuperar visión por ventanas laterales es la solución segura." },
+  { section: "Emergencias viales", q: "¿Porqué se produce la rotura del parabrisas?", opts: ["Por piedras que saltan de los neumáticos de otros vehículos.", "Por el volumen muy alto de la radio.", "Por la fuerte discusión que había dentro del vehículo."], ans: 0, exp: "Las piedras proyectadas por otros neumáticos son la causa más común." },
+  { section: "Emergencias viales", q: "¿Porqué puede abrirse el capot del vehículo?", opts: ["Por fuertes vientos y huracanes.", "Mal cierre o daño del seguro.", "Por ir demasiado rápido en la autopista."], ans: 1, exp: "Un cierre defectuoso o seguro dañado permite la apertura del capot." },
+  { section: "Emergencias viales", q: "¿Cómo debe actuar en caso de apertura brusca del capot?", opts: ["Disminuir la velocidad, frenando suavemente.", "Guiar el vehículo hacia un costado de la carretera.", "Todas las anteriores."], ans: 2, exp: "Ambas acciones son necesarias: frenar suavemente y dirigirse a un lugar seguro." },
+  { section: "Encandilamiento", q: "El encandilamiento, produce una ceguera temporal de:", opts: ["20 segundos.", "7 segundos.", "No produce ceguera."], ans: 1, exp: "El encandilamiento causa ceguera temporal de aproximadamente 7 segundos." },
+  { section: "Encandilamiento", q: "¿Porqué se produce el encandilamiento?", opts: ["Por no hacer el cambio de luces altas a bajas al enfrentar a otro vehículo.", "Porque se dañó el mando de las luces altas.", "Porque no sé cómo hacer el cambio de luces."], ans: 0, exp: "No cambiar a luces bajas ante vehículos que vienen en sentido contrario causa encandilamiento." },
+  { section: "Encandilamiento", q: "¿Qué hacer en caso de encandilamiento?", opts: ["No mirar directamente a los focos que le están encandilando.", "Gire ligeramente la cabeza y mire de reojo el borde derecho de la carretera.", "Todas las anteriores."], ans: 2, exp: "Ambas tácticas (no mirar directamente y usar referencias laterales) protegen la visión." },
+  { section: "Encandilamiento", q: "¿Cuánto tiempo le tomará al conductor recuperar la visión normal después del encandilamiento?", opts: ["20 segundos.", "7 segundos.", "No necesita, porque usa lentes."], ans: 0, exp: "La recuperación de la visión normal tras encandilamiento toma alrededor de 20 segundos." },
+  { section: "Hipnosis de la ruta", q: "¿Porqué se produce la hipnosis de la ruta?", opts: ["Por conducir tramos monótonos o con el mismo escenario.", "Porque no se descansa lo suficiente.", "Porque el acompañante va durmiendo."], ans: 0, exp: "La monotonía de tramos largos sin variación produce hipnosis o somnolencia." },
+  { section: "Hipnosis de la ruta", q: "¿Qué se debe hacer en caso de hipnosis de la ruta?", opts: ["Mantenga los ojos en movimiento, mirar constantemente los espejos retrovisores, el tablero de instrumentos.", "Haga un poco de ejercicio, o busque un sitio de reposo.", "Todas las anteriores."], ans: 2, exp: "Mantener actividad mental y física, además de descansar, combate la hipnosis." },
+  { section: "Conducción defensiva", q: "Por seguridad, ¿Debe considerarse el mareo en la ruta como un factor de riesgo?", opts: ["Solamente si es de noche.", "Siempre.", "Solo si no se dispone del botiquín de primeros auxilios."], ans: 1, exp: "El mareo es siempre un factor de riesgo que afecta la conducción segura." },
+  { section: "Conducción defensiva", q: "¿Qué significa la conducción perfecta?", opts: ["Terminar un viaje sin accidentes, ni violaciones de tránsito.", "Sin descortesías, ni retrasos en los horarios.", "Todas las anteriores."], ans: 2, exp: "La conducción perfecta combina seguridad, legalidad y cortesía." },
+  { section: "Condiciones adversas", q: "¿En qué condición adversa se produce el Aquaplaning?", opts: ["Nieve.", "Sol.", "Lluvia."], ans: 2, exp: "El aquaplaning ocurre con lluvia cuando hay película de agua en el pavimento." },
+  { section: "Errores en la conducción", q: "Podemos tener dificultades en la vía, si:", opts: ["Aplicamos la conducción a la defensiva.", "Cometemos errores en la conducción.", "Cumplimos los deberes en la conducción."], ans: 1, exp: "Los errores en conducción generan dificultades; la conducción defensiva las evita." },
+  { section: "Neumáticos", q: "¿Si se revienta el neumático posterior, cómo puede darse cuenta?", opts: ["Golpea fuertemente la carrocería, sobre todo en la parte posterior.", "Hala el volante al lado del neumático con problema.", "Se detiene el vehículo."], ans: 0, exp: "El reventón posterior causa golpes y vibraciones notables en la parte trasera." },
+  { section: "Emergencias viales", q: "¿En el caso de cruzarse en su trayectoria un animal o una persona, que se debe pisar?", opts: ["A la persona.", "Al animal.", "Al freno."], ans: 2, exp: "El freno es lo único que debe accionarse para evitar colisión." },
+  { section: "Seguridad activa y pasiva", q: "¿Dónde está ubicado el sistema ABS?", opts: ["Neumáticos.", "Frenos.", "Motor."], ans: 1, exp: "El sistema ABS está integrado en el sistema de frenos para evitar bloqueos." },
+  { section: "Conducción defensiva", q: "¿Cuándo debemos conducir con las dos manos al volante?", opts: ["Durante todo el tiempo de la conducción.", "Cuando sea necesario.", "Solamente en las curvas."], ans: 0, exp: "Conducir con ambas manos todo el tiempo proporciona máximo control y seguridad." },
+  { section: "Emergencias viales", q: "Si durante la noche se ve obligado a detenerse, ¿Qué se debe hacer?", opts: ["Haga lo posible para apartar el vehículo al margen de la carretera.", "No eche nunca agua.", "Conduzca lo más a la derecha posible."], ans: 0, exp: "Apartar el vehículo al margen es crítico para evitar colisiones con otros." },
+  { section: "Emergencias viales", q: "Si un animal se cruza en la carretera, ¿qué se debe hacer?", opts: ["Mire a lo lejos a fin de localizar al animal con la mayor antelación posible y toque la bocina.", "No pierda la calma: recupere la visibilidad por las ventanas.", "No toque el pedal del freno, ni levante el pie del acelerador."], ans: 0, exp: "Anticipar con visión a distancia y alertar con la bocina son medidas preventivas." },
+  { section: "Condiciones adversas", q: "¿Qué hacer en caso de niebla en la carretera?", opts: ["Utilizar las marcas longitudinales de la calzada como guías.", "Cerrar las ventanillas para evitar la entrada de neblina.", "Cortar inmediatamente el encendido del motor y apartarnos a un costado."], ans: 0, exp: "Las marcas longitudinales guían al conductor cuando hay baja visibilidad por niebla." },
+]
+};
+
+let currentIndex = 0;
+let answers = {};
+
+function initQuiz() {
+  document.title = QUIZ_CONFIG.meta.pageTitle;
+  renderIntro();
+}
+
+function renderIntro() {
+  const intro = document.getElementById('screen-intro');
+  const { meta, source, topics, questions } = QUIZ_CONFIG;
+
+  intro.innerHTML = `
+    <div class="breadcrumb">
+      <a class="breadcrumb-link" href="../index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Portal
+      </a>
+      <span class="breadcrumb-separator">/</span>
+      <span style="font-size:12px;color:var(--text)">${meta.logoLabel}</span>
+    </div>
+    <div class="logo-row">
+      <div class="logo-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      </div>
+      <div class="logo-text">${meta.logoLabel}</div>
+    </div>
+    <div class="hero-tag">${meta.heroTag}</div>
+    <h1 class="hero-title">${meta.heroTitle.join(' ')}</h1>
+    <p class="hero-desc">${meta.description}</p>
+    <div class="stats-row">
+      <div class="stat"><span class="stat-num">${questions.length}</span><span class="stat-lbl">Preguntas</span></div>
+      <div class="stat"><span class="stat-num">${topics.length}</span><span class="stat-lbl">Temas</span></div>
+    </div>
+    <div class="topics">${topics.map(t => `<div class="topic-chip"><div class="topic-dot"></div>${t}</div>`).join('')}</div>
+    <div class="source-box">
+      <strong>${source.label}</strong>
+      ${source.title}<br/>
+      <small style="color:rgba(139,184,250,0.8)">${source.subtitle}</small>
+    </div>
+    <button class="btn-start" onclick="startQuiz()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Comenzar prueba
+    </button>
+  `;
+}
+
+function startQuiz() {
+  document.getElementById('screen-intro').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'block';
+  renderAllQuestions();
+  updateProgress();
+}
+
+function renderAllQuestions() {
+  const container = document.getElementById('questions-container');
+  container.innerHTML = QUIZ_CONFIG.questions.map((q, i) => `
+    <div class="question-card ${answers[i] !== undefined ? 'answered' : ''}" id="qcard-${i}">
+      <div class="q-meta">
+        <span class="q-num-badge">P${i+1}</span>
+        <div class="section-tag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          ${q.section}
+        </div>
+      </div>
+      <h2 class="q-title">${q.q}</h2>
+      <div class="options">
+        ${q.opts.map((opt, j) => `
+          <div class="opt ${answers[i] === j ? 'selected' : ''}" onclick="answerQuestion(${i}, ${j})">
+            <div class="opt-radio"></div>
+            <div class="opt-text">${opt}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function answerQuestion(qIdx, optIdx) {
+  answers[qIdx] = optIdx;
+  const card = document.getElementById('qcard-' + qIdx);
+  card.classList.add('answered');
+  card.querySelectorAll('.opt').forEach((el, j) => {
+    el.classList.toggle('selected', j === optIdx);
+  });
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = Object.keys(answers).length;
+  const total = QUIZ_CONFIG.questions.length;
+  const pct = Math.round((answered / total) * 100);
+  document.getElementById('prog-count').textContent = `${answered} / ${total}`;
+  document.getElementById('prog-fill').style.width = pct + '%';
+}
+
+function updateButtons() {
+  const allAnswered = Object.keys(answers).length === QUIZ_CONFIG.questions.length;
+  document.getElementById('btn-evaluate').disabled = !allAnswered;
+}
+
+function evaluateQuiz() {
+  if (Object.keys(answers).length < QUIZ_CONFIG.questions.length) {
+    alert('Por favor responde todas las preguntas antes de evaluar');
+    return;
+  }
+  renderResult();
+}
+
+function renderResult() {
+  document.getElementById('screen-quiz').style.display = 'none';
+  document.getElementById('screen-result').style.display = 'block';
+
+  let correctCount = 0;
+  QUIZ_CONFIG.questions.forEach((q, i) => {
+    if (answers[i] === q.ans) correctCount++;
+  });
+
+  const total = QUIZ_CONFIG.questions.length;
+  const pct = Math.round((correctCount / total) * 100);
+  const gradeObj = QUIZ_CONFIG.grading.find(g => pct >= g.min);
+
+  const result = document.getElementById('screen-result');
+  const circumference = 2 * Math.PI * 85;
+  const strokeDashoffset = circumference - (pct / 100) * circumference;
+
+  let reviewHTML = '';
+  QUIZ_CONFIG.questions.forEach((q, i) => {
+    const isCorrect = answers[i] === q.ans;
+    const userAns = q.opts[answers[i]];
+    const correctAns = q.opts[q.ans];
+
+    reviewHTML += `
+      <div class="review-item">
+        <div class="review-header">
+          <div class="review-q">P${i + 1}: ${q.q}</div>
+        </div>
+        <div class="review-answers">
+          <span class="ans-label">Tu respuesta:</span>
+          <div class="${isCorrect ? 'ans-correct' : 'ans-wrong'}">${userAns || '(no respondida)'}</div>
+          ${!isCorrect ? `<span class="ans-label" style="margin-top:0.5rem;display:block">Respuesta correcta:</span><div class="ans-correct">${correctAns}</div>` : ''}
+          <div class="ans-exp">${q.exp}</div>
+          <div class="ref-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            Pág. ${q.ref.page}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  result.innerHTML = `
+    <a class="breadcrumb-back" href="../index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Volver al portal
+    </a>
+    <div class="result-hero">
+      <div class="score-ring">
+        <svg viewBox="0 0 180 180">
+          <circle class="track" cx="90" cy="90" r="85"/>
+          <circle class="ring-fill" cx="90" cy="90" r="85" stroke="${gradeObj.color}" style="stroke-dasharray:${circumference};stroke-dashoffset:${strokeDashoffset}"/>
+        </svg>
+        <div class="score-inner">
+          <div class="score-num">${correctCount}</div>
+          <div class="score-denom">/ ${total}</div>
+        </div>
+      </div>
+      <div class="result-label" style="color:${gradeObj.color}">${gradeObj.label}</div>
+      <div class="result-pct">${pct}% correcto</div>
+    </div>
+    <div class="result-stats">
+      <div class="rs">
+        <span class="rs-num" style="color:var(--green)">${correctCount}</span>
+        <span class="rs-lbl">Correctas</span>
+      </div>
+      <div class="rs">
+        <span class="rs-num" style="color:var(--red)">${total - correctCount}</span>
+        <span class="rs-lbl">Incorrectas</span>
+      </div>
+      <div class="rs">
+        <span class="rs-num">${pct}%</span>
+        <span class="rs-lbl">Porcentaje</span>
+      </div>
+    </div>
+    <div class="result-quiz-layout">
+      <div class="review-sidebar">
+        <div class="sidebar-title">Resultados</div>
+        <div class="review-list">
+          ${QUIZ_CONFIG.questions.map((q, i) => {
+            const isCorrect = answers[i] === q.ans;
+            return `<div class="review-number ${isCorrect ? 'correct' : 'incorrect'}" onclick="scrollToReview(${i})">${i + 1}</div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="review-content" id="review-content">
+        ${reviewHTML}
+      </div>
+    </div>
+    <div class="result-actions">
+      <button class="btn-nav" onclick="retryQuiz()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2-8.83"/></svg>
+        Reintentar
+      </button>
+      <button class="btn-nav primary" onclick="goHome()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Volver al portal
+      </button>
+    </div>
+  `;
+  window.scrollTo(0, 0);
+}
+
+function scrollToReview(idx) {
+  const reviewContent = document.getElementById('review-content');
+  if (reviewContent) {
+    reviewContent.children[idx].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function retryQuiz() {
+  answers = {};
+  document.getElementById('screen-result').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'block';
+  renderAllQuestions();
+  updateProgress();
+  window.scrollTo(0, 0);
+}
+
+function goHome() {
+  window.location.href = '../index.html';
+}
+
+initQuiz();
+</script>
+</body>
+</html>

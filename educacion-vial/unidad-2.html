@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz — Educación Vial · Unidad 2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0D0F14; --surface:#161A23; --surface2:#1E2330;
+      --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.14);
+      --accent:#F5C518; --accent2:#E8A900;
+      --text:#F0F2F8; --muted:#7A8099;
+      --green:#22C47A; --red:#FF5A5A;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(245,197,24,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(245,197,24,0.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+    .glow{position:fixed;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(245,197,24,0.06) 0%,transparent 70%);top:-200px;right:-200px;pointer-events:none;z-index:0}
+
+    .container{max-width:900px;margin:0 auto;padding:2rem 1.5rem 4rem;position:relative;z-index:1}
+
+    /* HEADER */
+    .header{margin-bottom:3rem;display:flex;align-items:center;justify-content:space-between}
+    .breadcrumb{display:flex;align-items:center;gap:8px}
+    .breadcrumb-link{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);text-decoration:none;cursor:pointer;transition:color .15s}
+    .breadcrumb-link:hover{color:var(--text)}
+    .breadcrumb-separator{color:var(--border);margin:0 4px}
+
+    .progress-bar{width:200px;height:6px;background:var(--surface);border-radius:3px;overflow:hidden}
+    .progress-fill{height:100%;background:var(--accent);width:0%;transition:width .3s ease}
+
+    .logo-row{display:flex;align-items:center;gap:12px;margin-bottom:2rem}
+    .logo-badge{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center}
+    .logo-badge svg{width:20px;height:20px;color:#0D0F14}
+    .logo-text{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+    .hero-tag{display:inline-block;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(245,197,24,.3);padding:4px 12px;border-radius:20px;margin-bottom:1.5rem}
+    .hero-title{font-family:'Syne',sans-serif;font-size:clamp(32px,6vw,48px);font-weight:800;line-height:1.1;letter-spacing:-.02em;margin-bottom:1rem}
+    .hero-title em{font-style:normal;color:var(--accent)}
+    .hero-desc{font-size:16px;color:var(--muted);line-height:1.7;max-width:540px;margin-bottom:2rem}
+
+    /* QUIZ CONTAINER */
+    .quiz-state-initial,
+    .quiz-state-answering,
+    .quiz-state-result { display:none }
+    .quiz-state-initial.active,
+    .quiz-state-answering.active,
+    .quiz-state-result.active { display:block }
+
+    .questions-container{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:1.5rem;margin-bottom:3rem}
+
+    .question-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.75rem;transition:all .2s}
+    .question-card.answered{border-color:var(--accent)}
+    .question-card:hover:not(.answered){border-color:rgba(245,197,24,.3)}
+
+    .q-meta{display:flex;align-items:center;gap:10px;margin-bottom:1rem;font-size:12px;color:var(--muted)}
+    .q-num-badge{font-family:'Syne';font-weight:700;color:var(--accent)}
+    .q-topic{font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+
+    .q-text{font-size:15px;font-weight:500;line-height:1.6;margin-bottom:1.5rem;color:var(--text)}
+
+    .q-options{display:flex;flex-direction:column;gap:10px}
+    .q-option{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s}
+    .q-option:hover{background:rgba(245,197,24,.08);border-color:rgba(245,197,24,.2)}
+    .q-option.selected{background:var(--accent);border-color:var(--accent);color:#0D0F14}
+    .q-option.correct{background:rgba(34,196,122,.15);border-color:var(--green)}
+    .q-option.incorrect{background:rgba(255,90,90,.15);border-color:var(--red)}
+
+    .q-option-radio{width:18px;height:18px;border:2px solid var(--muted);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .q-option.selected .q-option-radio{border-color:var(--text);background:#0D0F14}
+    .q-option.selected .q-option-radio::after{content:'';width:6px;height:6px;background:#0D0F14;border-radius:50%}
+    .q-option.correct .q-option-radio{border-color:var(--green);background:var(--green)}
+    .q-option.correct .q-option-radio::after{content:'✓';color:#0D0F14;font-size:10px;font-weight:700}
+    .q-option.incorrect .q-option-radio{border-color:var(--red)}
+
+    .q-explanation{font-size:13px;color:var(--muted);line-height:1.6;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);display:none}
+    .question-card.answered .q-explanation{display:block}
+
+    .quiz-footer{max-width:760px;margin:0 auto;text-align:right}
+    .quiz-footer button{background:var(--accent);color:#0D0F14;border:none;border-radius:10px;padding:12px 24px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all .2s}
+    .quiz-footer button:hover{background:var(--accent2);transform:translateX(2px)}
+
+    .result-container{max-width:760px;margin:0 auto;text-align:center}
+    .result-score{font-family:'Syne';font-size:clamp(48px,10vw,72px);font-weight:800;margin-bottom:1rem}
+    .result-score.excellent{color:var(--accent)}
+    .result-score.good{color:var(--green)}
+    .result-score.fair{color:var(--text)}
+    .result-score.poor{color:var(--red)}
+
+    .result-ring-container{width:240px;height:240px;margin:0 auto 2rem;position:relative}
+    .result-ring{width:100%;height:100%;border-radius:50%}
+    .result-ring-bg{position:absolute;inset:0;border-radius:50%;border:12px solid var(--surface2)}
+    .result-ring-stroke{position:absolute;inset:0;border-radius:50%;border:12px solid var(--accent);border-bottom-color:transparent;border-left-color:transparent;stroke-dasharray:150 628;stroke-dashoffset:0;animation:fillRing 1.2s ease-out forwards}
+    @keyframes fillRing{from{stroke-dashoffset:628}to{stroke-dashoffset:0}}
+
+    .result-message{font-size:18px;font-weight:600;color:var(--text);margin-bottom:1rem}
+    .result-details{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:2rem}
+    .result-stats{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem;font-size:13px}
+    .stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem}
+    .stat-label{color:var(--muted);margin-bottom:.5rem}
+    .stat-value{font-family:'Syne';font-size:24px;font-weight:700;color:var(--accent)}
+
+    @media(max-width:768px){
+      .header{flex-direction:column;align-items:flex-start;gap:1rem}
+      .progress-bar{width:100%}
+      .result-stats{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="container">
+  <div class="header">
+    <div class="breadcrumb">
+      <a class="breadcrumb-link" href="./index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Volver
+      </a>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill"></div>
+    </div>
+  </div>
+
+  <div class="logo-row">
+    <div class="logo-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/></svg>
+    </div>
+    <div class="logo-text">Educación Vial</div>
+  </div>
+
+  <div class="hero-tag">Unidad 2 · 30 preguntas</div>
+  <h1 class="hero-title">Señales de <em>Tránsito</em></h1>
+  <p class="hero-desc">Evalúa tu conocimiento sobre los diferentes tipos de señales de tránsito: semáforos, señales manuales, acústicas y más. Responde todas las preguntas para obtener tu resultado.</p>
+
+  <div class="quiz-state-initial active">
+    <button class="unit-button" style="display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#0D0F14;border:none;border-radius:10px;padding:12px 24px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;letter-spacing:.04em;cursor:pointer;text-decoration:none;transition:all .2s" id="startBtn">
+      Comenzar Quiz
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+
+  <div class="quiz-state-answering">
+    <div class="questions-container" id="questionsContainer"></div>
+    <div class="quiz-footer">
+      <button id="submitBtn">Enviar Respuestas</button>
+    </div>
+  </div>
+
+  <div class="quiz-state-result">
+    <div class="result-container">
+      <div class="result-ring-container">
+        <div class="result-ring-bg"></div>
+        <svg class="result-ring" viewBox="0 0 200 200"><circle cx="100" cy="100" r="90" fill="none" stroke="currentColor" stroke-width="12" stroke-dasharray="150 628"/></svg>
+      </div>
+      <div class="result-score" id="resultScore">0%</div>
+      <div class="result-message" id="resultMessage">Resultado</div>
+      <div class="result-details" id="resultDetails">Detalles del resultado</div>
+      <div class="result-stats">
+        <div class="stat">
+          <div class="stat-label">Respuestas correctas</div>
+          <div class="stat-value" id="correctCount">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Respuestas incorrectas</div>
+          <div class="stat-value" id="incorrectCount">0</div>
+        </div>
+      </div>
+      <button id="retryBtn">Intentar de nuevo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUIZ_CONFIG = {
+  meta: {
+    pageTitle: "Quiz — Educación Vial · Unidad 2",
+    logoLabel: "Educación Vial",
+    heroTag: "Unidad 2 · 30 preguntas",
+    heroTitle: "Señales de Tránsito",
+    description: "Evalúa tu conocimiento sobre los diferentes tipos de señales de tránsito."
+  },
+  topics: ["Definición", "Semáforo Vehicular", "Semáforo Peatonal", "Señales Acústicas", "Señales Manuales", "Señales Horizontales", "Señales Verticales"],
+  questions: [
+    {
+      text: "¿Qué son las señales de tránsito?",
+      options: [
+        "Dispositivos reglamentarios que informan, advierten o regulan el tránsito.",
+        "Solo las líneas pintadas en la calzada.",
+        "Únicamente los semáforos de las intersecciones."
+      ],
+      correct: 0,
+      explanation: "Las señales de tránsito son dispositivos reglamentarios diseñados para informar, advertir o regular el movimiento vehicular y de peatones.",
+      topic: "Definición"
+    },
+    {
+      text: "¿Qué indica el semáforo en color rojo para los vehículos?",
+      options: [
+        "Proceder con precaución.",
+        "Detenerse completamente.",
+        "Ceder el paso a los demás vehículos."
+      ],
+      correct: 1,
+      explanation: "El rojo indica que los vehículos deben detenerse completamente y no proceder por la intersección.",
+      topic: "Semáforo Vehicular"
+    },
+    {
+      text: "El semáforo en rojo intermitente para vehículos significa:",
+      options: [
+        "Estacionar en la zona.",
+        "Detenerse, ceder el paso y proceder cuando sea seguro.",
+        "Acelerar y pasar rápidamente."
+      ],
+      correct: 1,
+      explanation: "El rojo intermitente (titilante) obliga a detenerse, ceder el paso a otros vehículos y proceder solo cuando sea seguro.",
+      topic: "Semáforo Vehicular"
+    },
+    {
+      text: "¿Qué significa el semáforo en color amarillo?",
+      options: [
+        "Proceder a mayor velocidad.",
+        "Prepararse para detenerse o continuar si es seguro.",
+        "Detener el vehículo inmediatamente."
+      ],
+      correct: 1,
+      explanation: "El amarillo advierte que la luz va a cambiar a rojo, el conductor debe prepararse para detenerse o continuar si puede hacerlo con seguridad.",
+      topic: "Semáforo Vehicular"
+    },
+    {
+      text: "El semáforo amarillo intermitente indica:",
+      options: [
+        "Detenerse completamente.",
+        "Proceder con precaución, verificando que la vía esté libre.",
+        "Ceder el paso a los vehículos que vienen de la derecha."
+      ],
+      correct: 1,
+      explanation: "El amarillo intermitente permite proceder con precaución, verificando que la vía esté libre y que no haya conflicto con otros vehículos.",
+      topic: "Semáforo Vehicular"
+    },
+    {
+      text: "¿Qué indica el semáforo en color verde?",
+      options: [
+        "Detenerse antes de la línea de parada.",
+        "Proceder en la dirección indicada, cuidando a peatones y ciclistas.",
+        "Estacionar el vehículo."
+      ],
+      correct: 1,
+      explanation: "El verde permite el paso a los vehículos en la dirección indicada, pero siempre respetando a peatones, ciclistas y otros usuarios viales.",
+      topic: "Semáforo Vehicular"
+    },
+    {
+      text: "Una flecha verde con rojo de fondo en el semáforo significa:",
+      options: [
+        "Giro permitido sin restricciones.",
+        "Permitir el giro indicado por la flecha; los demás sentidos están prohibidos.",
+        "Detener el vehículo en cualquier dirección."
+      ],
+      correct: 1,
+      explanation: "La flecha verde indica que está permitido girar solo en la dirección que muestra la flecha, mientras que los otros sentidos tienen rojo.",
+      topic: "Semáforo Vehicular"
+    },
+    {
+      text: "¿Qué indica el semáforo peatonal en rojo fijo?",
+      options: [
+        "Cruzar la calzada.",
+        "No cruzar la calzada; los peatones deben esperar.",
+        "Cruzar rápidamente."
+      ],
+      correct: 1,
+      explanation: "El rojo fijo en el semáforo peatonal indica que no está permitido cruzar; los peatones deben esperar la indicación en verde.",
+      topic: "Semáforo Peatonal"
+    },
+    {
+      text: "El semáforo peatonal en rojo intermitente significa:",
+      options: [
+        "No cruzar; hay tiempo insuficiente.",
+        "Cruzar de inmediato.",
+        "Esperar en el cruce."
+      ],
+      correct: 0,
+      explanation: "El rojo intermitente en semáforo peatonal advierte que el tiempo para cruzar es insuficiente; los peatones deben evitar entrar en la calzada.",
+      topic: "Semáforo Peatonal"
+    },
+    {
+      text: "¿Qué indica el semáforo peatonal en verde?",
+      options: [
+        "Cruzar la calzada con precaución, verificando que los vehículos se detengan.",
+        "Cruzar sin mirar.",
+        "Esperar en la acera."
+      ],
+      correct: 0,
+      explanation: "El verde en semáforo peatonal permite cruzar la calzada, pero los peatones deben verificar que los vehículos realmente se detengan.",
+      topic: "Semáforo Peatonal"
+    },
+    {
+      text: "¿Qué significa un silbido largo seguido de uno corto en las señales acústicas del agente?",
+      options: [
+        "Detención de todo el tráfico.",
+        "Circulación permitida; vía libre.",
+        "Cambio de carril."
+      ],
+      correct: 1,
+      explanation: "Un silbido largo seguido de uno corto indica que la vía está libre y el tráfico puede circular.",
+      topic: "Señales Acústicas"
+    },
+    {
+      text: "¿Qué indica dos silbidos cortos rápidos en las señales acústicas?",
+      options: [
+        "Vía libre; circulación permitida.",
+        "Contravención de tránsito.",
+        "Detención inmediata del vehículo."
+      ],
+      correct: 0,
+      explanation: "Dos silbidos cortos rápidos indican que la vía está libre y que el tráfico puede continuar circulando.",
+      topic: "Señales Acústicas"
+    },
+    {
+      text: "¿Qué significa varios silbidos cortos rápidos como señal acústica?",
+      options: [
+        "Vía libre.",
+        "Se ha cometido una contravención de tránsito.",
+        "Cambio de dirección permitido."
+      ],
+      correct: 1,
+      explanation: "Varios silbidos cortos rápidos indican que el conductor ha cometido una contravención y debe proceder conforme a lo que indique el agente.",
+      topic: "Señales Acústicas"
+    },
+    {
+      text: "¿Cuál es el límite máximo de sonoridad de la bocina de un vehículo?",
+      options: [
+        "40 decibeles.",
+        "50 decibeles.",
+        "80 decibeles."
+      ],
+      correct: 1,
+      explanation: "La bocina de un vehículo no debe exceder los 50 decibeles para no causar contaminación sonora.",
+      topic: "Señales Acústicas"
+    },
+    {
+      text: "¿Qué significa cuando el agente levanta la mano en alto con la palma hacia adelante?",
+      options: [
+        "Virar a la derecha.",
+        "Detener el tráfico.",
+        "Ceder el paso."
+      ],
+      correct: 1,
+      explanation: "Cuando el agente levanta la mano en alto con la palma hacia adelante, está ordenando que el tráfico se detenga.",
+      topic: "Señales Manuales"
+    },
+    {
+      text: "¿Qué señal manual del agente indica un viraje a la derecha?",
+      options: [
+        "Brazo extendido hacia la derecha a la altura del hombro, con la palma abierta hacia abajo.",
+        "Brazo levantado en alto con la palma hacia adelante.",
+        "Ambos brazos extendidos horizontalmente."
+      ],
+      correct: 0,
+      explanation: "El brazo extendido hacia la derecha a la altura del hombro con palma hacia abajo indica que se permite girar a la derecha.",
+      topic: "Señales Manuales"
+    },
+    {
+      text: "¿Qué significa cuando el agente extiende el brazo izquierdo a la altura del hombro?",
+      options: [
+        "Virar a la izquierda.",
+        "Detenerse.",
+        "Pasar al carril izquierdo."
+      ],
+      correct: 0,
+      explanation: "El brazo izquierdo extendido a la altura del hombro con palma abierta hacia abajo autoriza un giro a la izquierda.",
+      topic: "Señales Manuales"
+    },
+    {
+      text: "¿Qué señal manual del agente indica la orden de estacionar?",
+      options: [
+        "Brazo levantado en alto.",
+        "Brazos extendidos hacia los lados.",
+        "Movimiento circular del brazo."
+      ],
+      correct: 2,
+      explanation: "Un movimiento circular del brazo indica que los vehículos deben estacionar en esa zona o cambiar su dirección.",
+      topic: "Señales Manuales"
+    },
+    {
+      text: "¿Qué es una línea continua en las señales horizontales?",
+      options: [
+        "Una línea que pueden cruzar los vehículos cuando es necesario.",
+        "Una línea que no debe ser cruzada por ningún vehículo.",
+        "Una línea que indica estacionamiento permitido."
+      ],
+      correct: 1,
+      explanation: "Una línea continua (sólida) es una prohibición; los vehículos no deben cruzarla bajo ninguna circunstancia.",
+      topic: "Señales Horizontales"
+    },
+    {
+      text: "¿Qué indica una línea discontinua (punteada) en la calzada?",
+      options: [
+        "Prohibición absoluta de cruzar.",
+        "Está permitido cruzar cuando es seguro y hay visibilidad.",
+        "Zona de estacionamiento exclusivo."
+      ],
+      correct: 1,
+      explanation: "Una línea discontinua permite el cruce cuando el conductor verifica que es seguro y que tiene buena visibilidad.",
+      topic: "Señales Horizontales"
+    },
+    {
+      text: "¿Qué significan las flechas blancas sobre la calzada?",
+      options: [
+        "Peatones pueden cruzar.",
+        "Indican la dirección obligatoria del tránsito en ese carril.",
+        "Zona de estacionamiento."
+      ],
+      correct: 1,
+      explanation: "Las flechas sobre el pavimento indican la dirección que deben seguir los vehículos en ese carril.",
+      topic: "Señales Horizontales"
+    },
+    {
+      text: "¿Qué es la línea de PARE en las señales horizontales?",
+      options: [
+        "Una línea discontinua que permite pasar con cuidado.",
+        "Una línea transversal blanca que marca dónde debe detenerse el vehículo.",
+        "Una línea que divide los carriles."
+      ],
+      correct: 1,
+      explanation: "La línea de PARE es una línea transversal blanca discontinua que marca el punto donde el vehículo debe detenerse.",
+      topic: "Señales Horizontales"
+    },
+    {
+      text: "¿Qué indica el triángulo en las señales horizontales?",
+      options: [
+        "Línea de estacionamiento.",
+        "Marca de cruce peatonal.",
+        "Línea de CEDA EL PASO; el vehículo debe ceder paso a otros."
+      ],
+      correct: 2,
+      explanation: "Un triángulo en la calzada indica la línea de CEDA EL PASO donde el conductor debe verificar que no haya vehículos antes de proceder.",
+      topic: "Señales Horizontales"
+    },
+    {
+      text: "¿Qué indica la marca BUS en las señales horizontales?",
+      options: [
+        "Zona de estacionamiento permitido.",
+        "Carril exclusivo para autobuses de transporte público.",
+        "Zona de taxis únicamente."
+      ],
+      correct: 1,
+      explanation: "La marca BUS en la calzada indica un carril o zona exclusiva para vehículos de transporte público.",
+      topic: "Señales Horizontales"
+    },
+    {
+      text: "¿Qué son los chevrones en las señales horizontales?",
+      options: [
+        "Flechas que indican dirección.",
+        "Marcas diagonales que canalizan el tráfico o protegen áreas.",
+        "Líneas que dividen carriles."
+      ],
+      correct: 1,
+      explanation: "Los chevrones (marcas diagonales de líneas blancas) canalizan el movimiento del tránsito y protegen áreas especiales.",
+      topic: "Señales Horizontales"
+    },
+    {
+      text: "¿Cuál es la definición de señales verticales de tránsito?",
+      options: [
+        "Líneas pintadas en la calzada.",
+        "Estructuras fijas que informan, advierten o regulan el tránsito mediante símbolos y texto.",
+        "Semáforos únicamente."
+      ],
+      correct: 1,
+      explanation: "Las señales verticales son estructuras fijas (postes) que comunican información mediante símbolos, texto y colores específicos.",
+      topic: "Señales Verticales"
+    },
+    {
+      text: "¿Cuál es la forma reglamentaria de las señales preventivas?",
+      options: [
+        "Rectangular con borde rojo.",
+        "Cuadrada, girada 45 grados (de diamante), con fondo amarillo.",
+        "Octogonal roja."
+      ],
+      correct: 1,
+      explanation: "Las señales preventivas tienen forma de cuadrado girado 45 grados (diamante) con fondo amarillo y símbolo negro.",
+      topic: "Señales Verticales"
+    },
+    {
+      text: "¿Qué color predomina en las señales informativas?",
+      options: [
+        "Rojo y blanco.",
+        "Amarillo con negro.",
+        "Verde y blanco, o azul y blanco según el tipo de información."
+      ],
+      correct: 2,
+      explanation: "Las señales informativas son verde y blanco para rutas principales, azul y blanco para servicios y marrón y blanco para turismo.",
+      topic: "Señales Verticales"
+    },
+    {
+      text: "¿Qué tipo de información proporciona una señal vertical naranja?",
+      options: [
+        "Información turística.",
+        "Información de obras en construcción o mantenimiento de la vía.",
+        "Servicio de emergencia."
+      ],
+      correct: 1,
+      explanation: "Las señales naranjas advierten sobre obras en construcción o mantenimiento vial, y alertan a los conductores sobre cambios temporales.",
+      topic: "Señales Verticales"
+    },
+    {
+      text: "¿Cuáles son los tres colores principales que usa una señal reglamentaria?",
+      options: [
+        "Amarillo, blanco y negro.",
+        "Rojo, blanco y negro, o azul, blanco y negro según su propósito.",
+        "Verde, amarillo y rojo."
+      ],
+      correct: 1,
+      explanation: "Las señales reglamentarias usan rojo, blanco y negro (prohibiciones/obligaciones) o azul, blanco y negro (información).",
+      topic: "Señales Verticales"
+    }
+  ]
+};
+
+let answers = {};
+const states = {
+  initial: document.querySelector('.quiz-state-initial'),
+  answering: document.querySelector('.quiz-state-answering'),
+  result: document.querySelector('.quiz-state-result')
+};
+
+function showState(stateName) {
+  Object.values(states).forEach(s => s.classList.remove('active'));
+  states[stateName].classList.add('active');
+}
+
+function startQuiz() {
+  answers = {};
+  showState('answering');
+  renderAllQuestions();
+  window.scrollTo(0, 0);
+}
+
+function renderAllQuestions() {
+  const container = document.getElementById('questionsContainer');
+  container.innerHTML = '';
+
+  QUIZ_CONFIG.questions.forEach((q, idx) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+
+    const meta = document.createElement('div');
+    meta.className = 'q-meta';
+    meta.innerHTML = `
+      <span class="q-num-badge">Pregunta ${idx + 1}</span>
+      <span class="q-topic">${q.topic}</span>
+    `;
+
+    const text = document.createElement('div');
+    text.className = 'q-text';
+    text.textContent = q.text;
+
+    const optionsDiv = document.createElement('div');
+    optionsDiv.className = 'q-options';
+
+    q.options.forEach((opt, optIdx) => {
+      const option = document.createElement('div');
+      option.className = 'q-option';
+      if (answers[idx] === optIdx) option.classList.add('selected');
+
+      option.innerHTML = `
+        <div class="q-option-radio"></div>
+        <span>${opt}</span>
+      `;
+
+      option.addEventListener('click', () => answerQuestion(idx, optIdx));
+      optionsDiv.appendChild(option);
+    });
+
+    const explanation = document.createElement('div');
+    explanation.className = 'q-explanation';
+    explanation.textContent = q.explanation;
+
+    card.appendChild(meta);
+    card.appendChild(text);
+    card.appendChild(optionsDiv);
+    card.appendChild(explanation);
+    container.appendChild(card);
+  });
+
+  updateProgress();
+}
+
+function answerQuestion(qIdx, optIdx) {
+  answers[qIdx] = optIdx;
+  const cards = document.querySelectorAll('.question-card');
+  const card = cards[qIdx];
+  card.classList.add('answered');
+
+  const options = card.querySelectorAll('.q-option');
+  const correct = QUIZ_CONFIG.questions[qIdx].correct;
+
+  options.forEach((opt, idx) => {
+    opt.classList.remove('selected');
+    if (idx === optIdx) {
+      if (idx === correct) {
+        opt.classList.add('correct');
+      } else {
+        opt.classList.add('incorrect');
+      }
+    }
+    if (idx === correct && idx !== optIdx) {
+      opt.classList.add('correct');
+    }
+  });
+
+  updateProgress();
+}
+
+function updateProgress() {
+  const answered = Object.keys(answers).length;
+  const total = QUIZ_CONFIG.questions.length;
+  const percentage = (answered / total) * 100;
+  document.querySelector('.progress-fill').style.width = percentage + '%';
+}
+
+function submitQuiz() {
+  const unanswered = QUIZ_CONFIG.questions.length - Object.keys(answers).length;
+  if (unanswered > 0) {
+    alert(`Por favor responde todas las preguntas. Te faltan ${unanswered}.`);
+    return;
+  }
+  evaluateQuiz();
+}
+
+function evaluateQuiz() {
+  let correct = 0;
+  QUIZ_CONFIG.questions.forEach((q, idx) => {
+    if (answers[idx] === q.correct) correct++;
+  });
+
+  const percentage = Math.round((correct / QUIZ_CONFIG.questions.length) * 100);
+  const total = QUIZ_CONFIG.questions.length;
+
+  document.getElementById('resultScore').textContent = percentage + '%';
+  document.getElementById('correctCount').textContent = correct;
+  document.getElementById('incorrectCount').textContent = total - correct;
+
+  let message, details, scoreClass;
+  if (percentage >= 90) {
+    message = '¡Excelente!';
+    details = 'Has dominado el conocimiento sobre señales de tránsito. Felicidades por tu desempeño excepcional.';
+    scoreClass = 'excellent';
+  } else if (percentage >= 70) {
+    message = 'Buen trabajo';
+    details = 'Tienes un buen conocimiento sobre señales de tránsito. Sigue practicando para mejorar.';
+    scoreClass = 'good';
+  } else if (percentage >= 50) {
+    message = 'Satisfecho';
+    details = 'Has alcanzado una calificación media. Repasa los tipos de señales para fortalecer tus conocimientos.';
+    scoreClass = 'fair';
+  } else {
+    message = 'Necesitas mejorar';
+    details = 'Tu calificación está por debajo del promedio. Te recomendamos repasar todo el contenido sobre señales de tránsito.';
+    scoreClass = 'poor';
+  }
+
+  document.getElementById('resultMessage').textContent = message;
+  document.getElementById('resultDetails').textContent = details;
+  document.getElementById('resultScore').className = 'result-score ' + scoreClass;
+
+  showState('result');
+  window.scrollTo(0, 0);
+}
+
+function retryQuiz() {
+  startQuiz();
+}
+
+document.getElementById('startBtn').addEventListener('click', startQuiz);
+document.getElementById('submitBtn').addEventListener('click', submitQuiz);
+document.getElementById('retryBtn').addEventListener('click', retryQuiz);
+</script>
+</body>
+</html>

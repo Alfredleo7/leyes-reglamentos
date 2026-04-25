@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Educación Vial — Cuestionarios</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0D0F14; --surface:#161A23; --surface2:#1E2330;
+      --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.14);
+      --accent:#F5C518; --accent2:#E8A900;
+      --text:#F0F2F8; --muted:#7A8099;
+      --green:#22C47A; --red:#FF5A5A;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(245,197,24,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(245,197,24,0.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+    .glow{position:fixed;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(245,197,24,0.06) 0%,transparent 70%);top:-200px;right:-200px;pointer-events:none;z-index:0}
+    .container{max-width:1200px;margin:0 auto;padding:2rem 1.5rem 4rem;position:relative;z-index:1}
+
+    /* HEADER */
+    .breadcrumb{display:flex;align-items:center;gap:8px;margin-bottom:2rem}
+    .breadcrumb-link{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);text-decoration:none;cursor:pointer;transition:color .15s}
+    .breadcrumb-link:hover{color:var(--text)}
+    .breadcrumb-separator{color:var(--border);margin:0 4px}
+
+    .logo-row{display:flex;align-items:center;gap:12px;margin-bottom:2rem}
+    .logo-badge{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center}
+    .logo-badge svg{width:20px;height:20px;color:#0D0F14}
+    .logo-text{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+    .hero-tag{display:inline-block;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(245,197,24,.3);padding:4px 12px;border-radius:20px;margin-bottom:1.5rem}
+    .hero-title{font-family:'Syne',sans-serif;font-size:clamp(32px,6vw,48px);font-weight:800;line-height:1.1;letter-spacing:-.02em;margin-bottom:1rem}
+    .hero-title em{font-style:normal;color:var(--accent)}
+    .hero-desc{font-size:16px;color:var(--muted);line-height:1.7;max-width:540px;margin-bottom:3rem}
+
+    /* UNITS GRID */
+    .units-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:2rem;margin-bottom:2rem}
+
+    .unit-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;transition:all .2s;position:relative;overflow:hidden}
+    .unit-card::before{content:'';position:absolute;top:0;right:-100px;width:200px;height:200px;background:radial-gradient(circle,rgba(245,197,24,0.05) 0%,transparent 70%);border-radius:50%;z-index:0}
+    .unit-card:not(.coming-soon):hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 12px 32px rgba(245,197,24,0.08)}
+
+    .unit-card.coming-soon{opacity:0.5;pointer-events:none}
+
+    .unit-content{position:relative;z-index:1}
+
+    .unit-badge{display:inline-block;font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:rgba(245,197,24,.1);border:1px solid rgba(245,197,24,.2);padding:4px 10px;border-radius:12px;margin-bottom:1rem}
+
+    .unit-number{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent);margin-bottom:.5rem}
+
+    .unit-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:0.75rem;line-height:1.3}
+
+    .unit-description{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:1.5rem}
+
+    .unit-meta{display:flex;align-items:center;gap:1rem;font-size:13px;color:var(--muted);margin-bottom:1.5rem}
+    .unit-meta-item{display:flex;align-items:center;gap:6px}
+    .unit-meta-item svg{width:16px;height:16px}
+
+    .unit-button{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#0D0F14;border:none;border-radius:10px;padding:12px 20px;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;letter-spacing:.04em;cursor:pointer;text-decoration:none;transition:all .2s}
+    .unit-button:hover{background:var(--accent2);transform:translateX(2px)}
+    .unit-button svg{width:16px;height:16px}
+
+    .unit-badge-soon{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:rgba(122,128,153,.15);border:1px solid rgba(122,128,153,.3);padding:6px 14px;border-radius:8px}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    .unit-card{animation:fadeUp .4s ease both}
+    .unit-card:nth-child(2){animation-delay:.1s}
+    .unit-card:nth-child(3){animation-delay:.2s}
+
+    @media(max-width:768px){
+      .units-grid{grid-template-columns:1fr}
+      .hero-desc{margin-bottom:2rem}
+    }
+  </style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="container">
+  <div class="breadcrumb">
+    <a class="breadcrumb-link" href="../index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Portal
+    </a>
+    <span class="breadcrumb-separator">/</span>
+    <span style="font-size:12px;color:var(--text)">Educación Vial</span>
+  </div>
+
+  <div class="logo-row">
+    <div class="logo-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/></svg>
+    </div>
+    <div class="logo-text">Educación Vial</div>
+  </div>
+
+  <div class="hero-tag">3 cuestionarios · Factores del Sistema Vial y Señales de Tránsito</div>
+  <h1 class="hero-title">Educación <em>Vial</em></h1>
+  <p class="hero-desc">Evalúa tu conocimiento sobre seguridad vial. Elige una unidad para comenzar el cuestionario.</p>
+
+  <div class="units-grid">
+    <!-- Unidad 1 -->
+    <div class="unit-card">
+      <div class="unit-content">
+        <div class="unit-badge">Unidad 1</div>
+        <div class="unit-number">1</div>
+        <h2 class="unit-title">Factores del Sistema Vial</h2>
+        <p class="unit-description">Aprende sobre los factores humano, vial y ambiental que intervienen en el tránsito y la seguridad vial.</p>
+        <div class="unit-meta">
+          <div class="unit-meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            30 preguntas
+          </div>
+          <div class="unit-meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c6.6 0 12 5.4 12 12s-5.4 12-12 12S0 20.6 0 14 5.4 2 12 2z"/></svg>
+            Básico
+          </div>
+        </div>
+        <a href="./unidad-1.html" class="unit-button">
+          Comenzar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Unidad 2 -->
+    <div class="unit-card">
+      <div class="unit-content">
+        <div class="unit-badge">Unidad 2</div>
+        <div class="unit-number">2</div>
+        <h2 class="unit-title">Señales de Tránsito</h2>
+        <p class="unit-description">Domina los semáforos, señales horizontales, verticales, acústicas y manuales para conducir con seguridad.</p>
+        <div class="unit-meta">
+          <div class="unit-meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            30 preguntas
+          </div>
+          <div class="unit-meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c6.6 0 12 5.4 12 12s-5.4 12-12 12S0 20.6 0 14 5.4 2 12 2z"/></svg>
+            Intermedio
+          </div>
+        </div>
+        <a href="./unidad-2.html" class="unit-button">
+          Comenzar
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Unidad 3 - Próximamente -->
+    <div class="unit-card coming-soon">
+      <div class="unit-content">
+        <div class="unit-badge-soon">Próximamente</div>
+        <div class="unit-number">3</div>
+        <h2 class="unit-title">Unidad 3</h2>
+        <p class="unit-description">Contenido adicional en desarrollo. Pronto estará disponible para ampliar tu conocimiento en educación vial.</p>
+        <div class="unit-meta">
+          <div class="unit-meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Por definir
+          </div>
+          <div class="unit-meta-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c6.6 0 12 5.4 12 12s-5.4 12-12 12S0 20.6 0 14 5.4 2 12 2z"/></svg>
+            Avanzado
+          </div>
+        </div>
+        <button class="unit-button" disabled style="opacity:.5;cursor:not-allowed">
+          No disponible
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

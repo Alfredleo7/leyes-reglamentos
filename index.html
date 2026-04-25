@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Portal interactivo de educación vial ecuatoriana. Cuestionarios basados en normativa oficial con más de 100 preguntas sobre conducción segura, leyes de tránsito y mecánica básica.">
+<meta name="keywords" content="educación vial, Ecuador, cuestionarios conducción, licencia de conducir, leyes de tránsito, seguridad vial">
+<meta name="author" content="Stalyn Gonzabay">
+<meta name="theme-color" content="#0D0F14">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Portal de Educación Vial — Ecuador">
+<meta property="og:description" content="Prepárate para conducir con responsabilidad. Cuestionarios interactivos basados en material oficial de educación vial ecuatoriana.">
+<meta property="og:site_name" content="Educación Vial Ecuador">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Portal de Educación Vial — Ecuador">
+<meta name="twitter:description" content="Cuestionarios interactivos sobre educación vial, leyes de tránsito y conducción segura en Ecuador.">
+<title>Portal de Educación Vial — Ecuador | Cuestionarios Interactivos</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0D0F14;
+    --surface: #161A23;
+    --surface2: #1E2330;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.14);
+    --accent: #F5C518;
+    --accent2: #E8A900;
+    --text: #F0F2F8;
+    --muted: #7A8099;
+    --green: #22C47A;
+    --red: #FF5A5A;
+    --blue: #4F8EF7;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* grid background */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(245,197,24,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,197,24,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* glow blobs */
+  .glow-1 {
+    position: fixed; width: 700px; height: 700px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,197,24,0.05) 0%, transparent 70%);
+    top: -300px; right: -200px; pointer-events: none; z-index: 0;
+  }
+  .glow-2 {
+    position: fixed; width: 500px; height: 500px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(79,142,247,0.04) 0%, transparent 70%);
+    bottom: -200px; left: -150px; pointer-events: none; z-index: 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(13,15,20,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-brand {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none;
+  }
+  .nav-logo {
+    width: 32px; height: 32px; background: var(--accent);
+    border-radius: 7px; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .nav-logo svg { width: 18px; height: 18px; }
+  .nav-name {
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--text);
+  }
+  .nav-pill {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent);
+    border: 1px solid rgba(245,197,24,0.3);
+    padding: 4px 12px; border-radius: 20px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative; z-index: 1;
+    max-width: 900px; margin: 0 auto;
+    padding: 5rem 2rem 3.5rem;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--accent);
+    border: 1px solid rgba(245,197,24,0.25);
+    background: rgba(245,197,24,0.06);
+    padding: 5px 14px; border-radius: 20px;
+    margin-bottom: 1.75rem;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-eyebrow::before {
+    content: ''; width: 6px; height: 6px;
+    border-radius: 50%; background: var(--accent);
+    animation: pulse 2s ease infinite;
+  }
+  @keyframes pulse {
+    0%,100%{opacity:1;transform:scale(1)}
+    50%{opacity:0.4;transform:scale(0.7)}
+  }
+
+  .hero-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 7vw, 68px);
+    font-weight: 800; line-height: 1.0;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.25rem;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .hero-title em { font-style: normal; color: var(--accent); }
+  .hero-title .line-muted { color: var(--muted); font-weight: 600; }
+
+  .hero-desc {
+    font-size: 17px; color: var(--muted); line-height: 1.75;
+    max-width: 560px; margin-bottom: 2.5rem;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .hero-stats {
+    display: flex; gap: 2rem; flex-wrap: wrap;
+    animation: fadeUp 0.6s 0.3s ease both;
+    margin-bottom: 0;
+  }
+  .h-stat { display: flex; flex-direction: column; gap: 2px; }
+  .h-stat-num {
+    font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800;
+    color: var(--accent); line-height: 1;
+  }
+  .h-stat-lbl { font-size: 12px; color: var(--muted); letter-spacing: 0.06em; }
+
+  /* divider */
+  .section-divider {
+    position: relative; z-index: 1;
+    max-width: 900px; margin: 0 auto;
+    padding: 0 2rem 0.5rem;
+  }
+  .section-head {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 1.75rem;
+  }
+  .section-label {
+    font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+    white-space: nowrap;
+  }
+  .section-line { flex: 1; height: 1px; background: var(--border); }
+
+  /* ── QUIZ CARDS GRID ── */
+  .cards-section {
+    position: relative; z-index: 1;
+    max-width: 900px; margin: 0 auto;
+    padding: 0 2rem 5rem;
+  }
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 20px;
+  }
+
+  .quiz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    text-decoration: none;
+    display: flex; flex-direction: column;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    animation: fadeUp 0.5s ease both;
+    cursor: pointer;
+  }
+  .quiz-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--border2);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+
+  /* card cover — pure CSS illustration */
+  .card-cover {
+    height: 160px;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .card-cover-bg {
+    position: absolute; inset: 0;
+  }
+  .card-cover-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(160deg, transparent 40%, rgba(13,15,20,0.7) 100%);
+  }
+  .card-cover-badge {
+    position: absolute; top: 14px; left: 14px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; padding: 4px 10px;
+    border-radius: 6px; backdrop-filter: blur(8px);
+  }
+  .card-cover-icon {
+    position: absolute; bottom: 14px; right: 14px;
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(8px);
+  }
+  .card-cover-icon svg { width: 26px; height: 26px; }
+
+  /* cover themes */
+  .cover-vial .card-cover-bg {
+    background: linear-gradient(135deg, #1a2235 0%, #0f1820 50%, #1a1408 100%);
+  }
+  .cover-vial::after {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 20% 50%, rgba(245,197,24,0.12) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(245,90,50,0.08) 0%, transparent 40%);
+  }
+  .cover-mecanica .card-cover-bg {
+    background: linear-gradient(135deg, #0f1a1a 0%, #0a1520 50%, #141a0f 100%);
+  }
+  .cover-mecanica::after {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 30% 60%, rgba(34,196,122,0.1) 0%, transparent 50%),
+      radial-gradient(circle at 70% 20%, rgba(79,142,247,0.06) 0%, transparent 40%);
+  }
+  .cover-teoria .card-cover-bg {
+    background: linear-gradient(135deg, #0f1520 0%, #141020 50%, #0a1a1a 100%);
+  }
+  .cover-teoria::after {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 25% 40%, rgba(79,142,247,0.12) 0%, transparent 50%),
+      radial-gradient(circle at 75% 70%, rgba(245,197,24,0.06) 0%, transparent 40%);
+  }
+  .cover-leyes .card-cover-bg {
+    background: linear-gradient(135deg, #1a0f15 0%, #200a10 50%, #1a1020 100%);
+  }
+  .cover-leyes::after {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 70% 30%, rgba(255,90,90,0.1) 0%, transparent 50%),
+      radial-gradient(circle at 20% 70%, rgba(245,197,24,0.06) 0%, transparent 40%);
+  }
+
+  /* geometric decorations inside cover */
+  .geo {
+    position: absolute;
+    border-radius: 4px;
+    opacity: 0.15;
+  }
+
+  /* card body */
+  .card-body {
+    padding: 1.25rem 1.25rem 1.5rem;
+    display: flex; flex-direction: column; flex: 1;
+  }
+  .card-unit {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700;
+    line-height: 1.3; color: var(--text); margin-bottom: 8px;
+  }
+  .card-desc {
+    font-size: 13px; color: var(--muted); line-height: 1.6;
+    margin-bottom: 1.25rem; flex: 1;
+  }
+  .card-meta {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+  }
+  .card-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    font-size: 10px; font-weight: 500; letter-spacing: 0.08em;
+    text-transform: uppercase; padding: 3px 8px;
+    border-radius: 5px; border: 1px solid var(--border2);
+    color: var(--muted); background: var(--surface2);
+    white-space: nowrap;
+  }
+  .card-arrow {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--surface2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .quiz-card:hover .card-arrow {
+    background: var(--accent); border-color: var(--accent);
+  }
+  .quiz-card:hover .card-arrow svg { stroke: #0D0F14; }
+  .card-arrow svg { width: 14px; height: 14px; stroke: var(--muted); transition: stroke 0.15s; }
+
+  /* coming soon state */
+  .quiz-card.soon {
+    opacity: 0.55; cursor: default; pointer-events: none;
+  }
+  .chip-soon {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 5px;
+    background: rgba(245,197,24,0.1); color: var(--accent);
+    border: 1px solid rgba(245,197,24,0.25);
+  }
+
+  /* ── ABOUT STRIP ── */
+  .about-strip {
+    position: relative; z-index: 1;
+    max-width: 900px; margin: 0 auto 0;
+    padding: 0 2rem 4rem;
+  }
+  .about-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem 1.75rem;
+    display: flex; align-items: center; gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .about-icon {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: rgba(245,197,24,0.1);
+    border: 1px solid rgba(245,197,24,0.2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .about-icon svg { width: 24px; height: 24px; }
+  .about-text { flex: 1; min-width: 200px; }
+  .about-text p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .about-text strong { color: var(--text); font-weight: 500; }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative; z-index: 1;
+    border-top: 1px solid var(--border);
+    background: rgba(13,15,20,0.95);
+    padding: 3rem 2rem 2rem;
+  }
+  .footer-inner {
+    max-width: 900px; margin: 0 auto;
+  }
+  .footer-top {
+    display: flex; gap: 3rem; flex-wrap: wrap;
+    margin-bottom: 2.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .footer-brand { flex: 1; min-width: 220px; }
+  .footer-logo-row {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;
+  }
+  .footer-logo {
+    width: 34px; height: 34px; background: var(--accent);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  }
+  .footer-logo svg { width: 18px; height: 18px; }
+  .footer-brand-name {
+    font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--text);
+  }
+  .footer-brand-desc { font-size: 13px; color: var(--muted); line-height: 1.7; max-width: 280px; }
+
+  .footer-creator { flex: 1; min-width: 220px; }
+  .footer-section-title {
+    font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 700;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 1.25rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .footer-section-title::after { content: ''; flex: 1; height: 1px; background: rgba(245,197,24,0.15); }
+
+  .creator-name {
+    font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700;
+    color: var(--text); margin-bottom: 4px;
+  }
+  .creator-role {
+    font-size: 13px; color: var(--accent); font-weight: 500;
+    margin-bottom: 1.25rem;
+  }
+  .creator-links { display: flex; flex-direction: column; gap: 10px; }
+  .creator-link {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 13px;
+    transition: color 0.15s;
+  }
+  .creator-link:hover { color: var(--text); }
+  .creator-link-icon {
+    width: 28px; height: 28px; border-radius: 7px;
+    background: var(--surface2); border: 1px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .creator-link:hover .creator-link-icon { background: var(--surface); border-color: var(--accent); }
+  .creator-link-icon svg { width: 13px; height: 13px; }
+
+  .footer-bottom {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 1rem;
+  }
+  .footer-copy { font-size: 12px; color: var(--muted); }
+  .footer-copy span { color: var(--accent); }
+  .footer-tech {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--muted); letter-spacing: 0.06em;
+  }
+  .footer-tech-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--green);
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* stagger cards */
+  .quiz-card:nth-child(1) { animation-delay: 0.05s; }
+  .quiz-card:nth-child(2) { animation-delay: 0.12s; }
+  .quiz-card:nth-child(3) { animation-delay: 0.19s; }
+  .quiz-card:nth-child(4) { animation-delay: 0.26s; }
+
+  @media (max-width: 1024px) {
+    .cards-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+  }
+
+  @media (max-width: 768px) {
+    .hero { padding: 4rem 1.5rem 2.5rem; }
+    .hero-title { font-size: clamp(28px, 6vw, 48px); }
+    .hero-desc { font-size: 15px; }
+    .hero-stats { gap: 1.5rem; }
+    .cards-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .cards-section { padding: 0 1.5rem 4rem; }
+    .section-divider { padding: 0 1.5rem 0.5rem; }
+    .about-strip { padding: 0 1.5rem 3rem; }
+    nav { padding: 0 1.5rem; }
+    footer { padding: 2.5rem 1.5rem 1.5rem; }
+    .footer-top { flex-direction: column; gap: 2rem; }
+  }
+
+  @media (max-width: 600px) {
+    .hero { padding: 3rem 1rem 2rem; }
+    .hero-title { font-size: clamp(24px, 5vw, 36px); }
+    .hero-desc { font-size: 14px; line-height: 1.6; }
+    .hero-stats { flex-direction: column; gap: 1rem; }
+    .h-stat-num { font-size: 24px; }
+    .cards-grid { grid-template-columns: 1fr; gap: 14px; }
+    .cards-section { padding: 0 1rem 3rem; }
+    .section-divider { padding: 0 1rem 0.5rem; }
+    .about-strip { padding: 0 1rem 2.5rem; }
+    .about-card { padding: 1rem; gap: 1rem; flex-direction: column; }
+    .about-icon { width: 40px; height: 40px; }
+    .about-icon svg { width: 20px; height: 20px; }
+    nav { padding: 0 1rem; height: 56px; }
+    .nav-name { font-size: 12px; }
+    .nav-pill { display: none; }
+    footer { padding: 2rem 1rem 1.5rem; }
+    .footer-top { flex-direction: column !important; gap: 1.5rem; padding-bottom: 1.5rem; }
+    .footer-brand-desc { max-width: 100%; }
+    .footer-logo-row { margin-bottom: 0.75rem; }
+    .card-cover { height: 140px; }
+    .card-title { font-size: 16px; }
+    .card-desc { font-size: 12px; }
+
+    /* Grid layouts to 1 column */
+    [style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+    [style*="grid-template-columns: 1fr 2fr"] { grid-template-columns: 1fr !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow-1"></div>
+<div class="glow-2"></div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="#">
+    <div class="nav-logo">
+      <svg viewBox="0 0 20 20" fill="#0D0F14"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm1 11H9v-2h2v2zm0-4H9V7h2v2z"/></svg>
+    </div>
+    <span class="nav-name">Educación Vial Ecuador</span>
+  </a>
+  <span class="nav-pill">Portal de Evaluación</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">Portal de evaluación vial</div>
+  <h1 class="hero-title">
+    Prepárate para<br>
+    <em>conducir</em> con<br>
+    <span class="line-muted">responsabilidad</span>
+  </h1>
+  <p class="hero-desc">
+    Cuestionarios interactivos basados en el material oficial de educación vial ecuatoriana. Evalúa tus conocimientos, revisa tus respuestas y consulta las referencias exactas del documento.
+  </p>
+  <div class="hero-stats">
+    <div class="h-stat">
+      <span class="h-stat-num">4</span>
+      <span class="h-stat-lbl">Módulos</span>
+    </div>
+    <div class="h-stat">
+      <span class="h-stat-num">100+</span>
+      <span class="h-stat-lbl">Preguntas</span>
+    </div>
+    <div class="h-stat">
+      <span class="h-stat-num">∞</span>
+      <span class="h-stat-lbl">Intentos</span>
+    </div>
+  </div>
+</section>
+
+<!-- CARDS -->
+<section class="cards-section">
+  <div class="section-divider" style="padding:0 0 1.75rem;">
+    <div class="section-head">
+      <span class="section-label">Cuestionarios disponibles</span>
+      <div class="section-line"></div>
+    </div>
+  </div>
+
+  <div class="cards-grid">
+
+    <!-- Card 1: Educación Vial -->
+    <a class="quiz-card cover-vial" href="educacion-vial/index.html">
+      <div class="card-cover">
+        <div class="card-cover-bg"></div>
+        <!-- geometric deco -->
+        <div class="geo" style="width:80px;height:80px;border:2px solid #F5C518;top:-20px;left:30px;transform:rotate(15deg);border-radius:12px"></div>
+        <div class="geo" style="width:40px;height:40px;background:#F5C518;top:20px;right:60px;transform:rotate(30deg)"></div>
+        <div class="geo" style="width:120px;height:3px;background:#F5C518;bottom:40px;left:20px;transform:rotate(-8deg)"></div>
+        <div class="geo" style="width:55px;height:55px;border:1.5px solid rgba(245,197,24,0.4);bottom:10px;right:30px;border-radius:50%"></div>
+        <div class="card-cover-overlay"></div>
+        <div class="card-cover-badge" style="background:rgba(245,197,24,0.15);color:#F5C518;border:1px solid rgba(245,197,24,0.3)">Unidades 1 & 2</div>
+        <div class="card-cover-icon" style="background:rgba(245,197,24,0.12);border:1px solid rgba(245,197,24,0.2)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#F5C518" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-unit">Módulo 01</div>
+        <div class="card-title">Educación Vial</div>
+        <div class="card-desc">Factores del sistema vial, usuarios de la vía, señales de tránsito, factor ambiental y normativa ecuatoriana.</div>
+        <div class="card-meta">
+          <div class="card-chips">
+            <span class="chip">50+ preguntas</span>
+            <span class="chip">Unidad 1 & 2</span>
+          </div>
+          <div class="card-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Card 2: Mecánica Básica -->
+    <a class="quiz-card cover-mecanica" href="mecanica-basica/index.html">
+      <div class="card-cover">
+        <div class="card-cover-bg"></div>
+        <div class="geo" style="width:60px;height:60px;border:2px solid #22C47A;top:15px;left:40px;transform:rotate(20deg);border-radius:8px"></div>
+        <div class="geo" style="width:90px;height:90px;border:1.5px solid rgba(34,196,122,0.3);bottom:-20px;right:20px;border-radius:50%"></div>
+        <div class="geo" style="width:30px;height:30px;background:#22C47A;top:35px;right:50px;transform:rotate(45deg);border-radius:4px"></div>
+        <div class="geo" style="width:100px;height:2px;background:#22C47A;bottom:50px;left:15px;transform:rotate(5deg)"></div>
+        <div class="card-cover-overlay"></div>
+        <div class="card-cover-badge" style="background:rgba(34,196,122,0.12);color:#22C47A;border:1px solid rgba(34,196,122,0.3)">Unidad 3</div>
+        <div class="card-cover-icon" style="background:rgba(34,196,122,0.1);border:1px solid rgba(34,196,122,0.2)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#22C47A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-unit">Módulo 02</div>
+        <div class="card-title">Mecánica Básica</div>
+        <div class="card-desc">Componentes del vehículo, sistemas de frenos, motor, transmisión, mantenimiento preventivo y diagnóstico básico.</div>
+        <div class="card-meta">
+          <div class="card-chips">
+            <span class="chip">44 preguntas</span>
+            <span class="chip">Unidades 1 & 2</span>
+          </div>
+          <div class="card-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Card 3: Teoría de la Conducción -->
+    <a class="quiz-card cover-teoria" href="teoria-conduccion/index.html">
+      <div class="card-cover">
+        <div class="card-cover-bg"></div>
+        <div class="geo" style="width:70px;height:70px;border:2px solid #4F8EF7;top:10px;right:40px;transform:rotate(-10deg);border-radius:10px"></div>
+        <div class="geo" style="width:110px;height:2px;background:#4F8EF7;top:55px;left:10px;transform:rotate(8deg)"></div>
+        <div class="geo" style="width:45px;height:45px;background:#4F8EF7;bottom:20px;left:35px;transform:rotate(25deg);border-radius:6px"></div>
+        <div class="geo" style="width:65px;height:65px;border:1.5px solid rgba(79,142,247,0.3);bottom:5px;right:25px;border-radius:50%"></div>
+        <div class="card-cover-overlay"></div>
+        <div class="card-cover-badge" style="background:rgba(79,142,247,0.12);color:#4F8EF7;border:1px solid rgba(79,142,247,0.3)">Unidad 3</div>
+        <div class="card-cover-icon" style="background:rgba(79,142,247,0.1);border:1px solid rgba(79,142,247,0.2)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#4F8EF7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><path d="M12 8l4 4-4 4M8 12h8"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-unit">Módulo 03</div>
+        <div class="card-title">Teoría de la Conducción</div>
+        <div class="card-desc">Técnicas de manejo defensivo, anticipación, distancias de seguridad, maniobras y comportamiento en la vía.</div>
+        <div class="card-meta">
+          <div class="card-chips">
+            <span class="chip">40+ preguntas</span>
+            <span class="chip">Unidad 3</span>
+          </div>
+          <div class="card-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <!-- Card 4: Leyes y Reglamentos -->
+    <a class="quiz-card cover-leyes" href="leyes-reglamentos/index.html">
+      <div class="card-cover">
+        <div class="card-cover-bg"></div>
+        <div class="geo" style="width:55px;height:75px;border:2px solid #FF5A5A;top:15px;left:30px;transform:rotate(-5deg);border-radius:6px"></div>
+        <div class="geo" style="width:35px;height:35px;background:#FF5A5A;top:25px;right:55px;transform:rotate(20deg);border-radius:4px"></div>
+        <div class="geo" style="width:90px;height:2px;background:#FF5A5A;bottom:45px;right:15px;transform:rotate(-12deg)"></div>
+        <div class="geo" style="width:75px;height:75px;border:1.5px solid rgba(255,90,90,0.25);bottom:5px;left:20px;border-radius:50%"></div>
+        <div class="card-cover-overlay"></div>
+        <div class="card-cover-badge" style="background:rgba(255,90,90,0.12);color:#FF5A5A;border:1px solid rgba(255,90,90,0.3)">Unidad 4</div>
+        <div class="card-cover-icon" style="background:rgba(255,90,90,0.1);border:1px solid rgba(255,90,90,0.2)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#FF5A5A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-unit">Módulo 04</div>
+        <div class="card-title">Leyes y Reglamentos de Tránsito</div>
+        <div class="card-desc">LOTTTSV, COIP, infracciones, sanciones, licencias de conducir y normativa vigente del Ecuador.</div>
+        <div class="card-meta">
+          <div class="card-chips">
+            <span class="chip">35+ preguntas</span>
+            <span class="chip">Unidad 4</span>
+          </div>
+          <div class="card-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ABOUT STRIP -->
+<section class="about-strip">
+  <div class="about-card">
+    <div class="about-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#F5C518" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+      </svg>
+    </div>
+    <div class="about-text">
+      <p>Este portal está basado en el <strong>material oficial de educación vial ecuatoriana</strong>. Cada respuesta incluye la referencia exacta de página y sección del documento fuente, permitiéndote verificar y profundizar en el contenido.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top" style="flex-direction: column; gap: 2.5rem; padding-bottom: 2.5rem;">
+
+      <!-- CV Section -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+
+        <!-- Left Column: Personal & Education -->
+        <div>
+          <h3 style="font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 0.5rem;">Stalyn Alfredo Gonzabay Yagual</h3>
+          <p style="font-size: 13px; color: var(--accent); font-weight: 500; margin-bottom: 1.25rem;">Ingeniero en Ciencias Computacionales</p>
+          <p style="font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 1.5rem;">Desarrollador Full Stack con experiencia en Angular, Node.js, bases de datos y arquitectura frontend. Especializado en crear soluciones web escalables.</p>
+
+          <div style="margin-bottom: 1.5rem;">
+            <p style="font-size: 10px; text-transform: uppercase; color: var(--accent); font-weight: 600; letter-spacing: 0.08em; margin-bottom: 0.75rem;">Contacto</p>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: var(--muted);">
+              <div>📧 stalgonzaya@gmail.com</div>
+              <div>📍 Cuenca, Ecuador</div>
+            </div>
+          </div>
+
+          <div>
+            <p style="font-size: 10px; text-transform: uppercase; color: var(--accent); font-weight: 600; letter-spacing: 0.08em; margin-bottom: 0.75rem;">Educación</p>
+            <div style="font-size: 12px;">
+              <p style="color: var(--text); font-weight: 500; margin-bottom: 2px;">Ingeniería en Ciencias Computacionales</p>
+              <p style="color: var(--muted); font-size: 11px;">ESPOL • 2013 - 2019</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Skills -->
+        <div>
+          <div class="footer-section-title" style="margin-bottom: 1.5rem;">Habilidades Técnicas</div>
+
+          <div style="margin-bottom: 1.5rem;">
+            <p style="font-size: 11px; color: var(--accent); font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">Lenguajes</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <span class="chip" style="background: rgba(79,142,247,0.1); border-color: rgba(79,142,247,0.2); color: #4F8EF7;">JavaScript</span>
+              <span class="chip" style="background: rgba(79,142,247,0.1); border-color: rgba(79,142,247,0.2); color: #4F8EF7;">TypeScript</span>
+              <span class="chip" style="background: rgba(79,142,247,0.1); border-color: rgba(79,142,247,0.2); color: #4F8EF7;">Python</span>
+              <span class="chip" style="background: rgba(79,142,247,0.1); border-color: rgba(79,142,247,0.2); color: #4F8EF7;">PHP</span>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 1.5rem;">
+            <p style="font-size: 11px; color: var(--accent); font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">Frameworks</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <span class="chip" style="background: rgba(34,196,122,0.1); border-color: rgba(34,196,122,0.2); color: #22C47A;">Angular</span>
+              <span class="chip" style="background: rgba(34,196,122,0.1); border-color: rgba(34,196,122,0.2); color: #22C47A;">Node.js</span>
+              <span class="chip" style="background: rgba(34,196,122,0.1); border-color: rgba(34,196,122,0.2); color: #22C47A;">Bootstrap</span>
+            </div>
+          </div>
+
+          <div>
+            <p style="font-size: 11px; color: var(--accent); font-weight: 600; text-transform: uppercase; margin-bottom: 6px;">Base de Datos</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <span class="chip" style="background: rgba(245,197,24,0.1); border-color: rgba(245,197,24,0.2); color: #F5C518;">MySQL</span>
+              <span class="chip" style="background: rgba(245,197,24,0.1); border-color: rgba(245,197,24,0.2); color: #F5C518;">PostgreSQL</span>
+              <span class="chip" style="background: rgba(245,197,24,0.1); border-color: rgba(245,197,24,0.2); color: #F5C518;">MongoDB</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Experience Section -->
+      <div style="padding-top: 1.5rem; border-top: 1px solid var(--border);">
+        <div class="footer-section-title" style="margin-bottom: 1.5rem;">Experiencia Laboral</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+          <div style="padding: 1rem; background: var(--surface2); border-radius: 8px; border-left: 3px solid var(--accent);">
+            <p style="font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 2px;">Desarrollador Frontend Angular</p>
+            <p style="font-size: 11px; color: var(--accent); margin-bottom: 0.5rem;">Aktiun • Actualidad</p>
+            <p style="font-size: 11px; color: var(--muted); line-height: 1.5;">Desarrollo de aplicaciones web con Angular para gestión educativa.</p>
+          </div>
+          <div style="padding: 1rem; background: var(--surface2); border-radius: 8px; border-left: 3px solid var(--green);">
+            <p style="font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 2px;">Desarrollador Full Stack</p>
+            <p style="font-size: 11px; color: var(--green); margin-bottom: 0.5rem;">ControlIQ • 2019 - 2020</p>
+            <p style="font-size: 11px; color: var(--muted); line-height: 1.5;">Construcción de aplicación web con Angular para auditoría médica.</p>
+          </div>
+          <div style="padding: 1rem; background: var(--surface2); border-radius: 8px; border-left: 3px solid var(--blue);">
+            <p style="font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 2px;">Desarrollador Full Stack</p>
+            <p style="font-size: 11px; color: var(--blue); margin-bottom: 0.5rem;">Platzi • 2018 - 2019</p>
+            <p style="font-size: 11px; color: var(--muted); line-height: 1.5;">Desarrollo web con Node.js y Angular para plataforma educativa.</p>
+          </div>
+          <div style="padding: 1rem; background: var(--surface2); border-radius: 8px; border-left: 3px solid var(--red);">
+            <p style="font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 2px;">Desarrollador Full Stack</p>
+            <p style="font-size: 11px; color: var(--red); margin-bottom: 0.5rem;">BurgerKing.ec • 2017</p>
+            <p style="font-size: 11px; color: var(--muted); line-height: 1.5;">App web con Node.js y Angular para registros de cajas.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Servicios Profesionales -->
+      <div style="padding: 1.5rem; background: linear-gradient(135deg, rgba(79,142,247,0.1) 0%, rgba(34,196,122,0.05) 100%); border: 1px solid rgba(79,142,247,0.2); border-radius: 12px; display: flex; align-items: flex-start; gap: 1rem;">
+        <div style="flex-shrink: 0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#4F8EF7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+        </div>
+        <div>
+          <p style="font-size: 12px; font-weight: 600; color: var(--text); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">Disponible para Servicios Profesionales</p>
+          <p style="font-size: 13px; color: var(--muted); line-height: 1.6;">Desarrollador Full Stack disponible para proyectos personalizados. Emito facturas electrónicas de acuerdo a la normativa tributaria ecuatoriana (RUC). Consulta por presupuestos sin compromiso.</p>
+        </div>
+      </div>
+
+      <!-- Contact Links & Modules -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+        <div class="footer-creator">
+          <div class="footer-section-title">Conecta conmigo</div>
+          <div class="creator-links">
+            <a class="creator-link" href="mailto:stalgonzaya@gmail.com">
+              <div class="creator-link-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#7A8099" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </div>
+              Email
+            </a>
+            <a class="creator-link" href="https://www.linkedin.com/in/stalyn-gonzabay-8b04a2191" target="_blank" rel="noopener">
+              <div class="creator-link-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#7A8099" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+              </div>
+              LinkedIn
+            </a>
+          </div>
+        </div>
+
+        <!-- Modules quick list -->
+        <div class="footer-creator">
+          <div class="footer-section-title">Módulos Disponibles</div>
+          <div class="creator-links">
+          <a class="creator-link" href="educacion-vial/index.html">
+            <div class="creator-link-icon" style="background:rgba(245,197,24,0.1);border-color:rgba(245,197,24,0.2)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#F5C518" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            </div>
+            Educación Vial
+          </a>
+          <a class="creator-link" href="mecanica-basica/index.html">
+            <div class="creator-link-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#22C47A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            Mecánica Básica
+          </a>
+          <a class="creator-link" href="teoria-conduccion/index.html">
+            <div class="creator-link-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#4F8EF7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8l4 4-4 4M8 12h8"/></svg>
+            </div>
+            Teoría de la Conducción
+          </a>
+          <a class="creator-link" href="leyes-reglamentos/index.html">
+            <div class="creator-link-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#FF5A5A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            Leyes y Reglamentos
+          </a>
+        </div>
+      </div>
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <p class="footer-copy">
+        &copy; 2025 <span>Educación Vial Ecuador</span> — Desarrollado por Stalyn Gonzabay Yagual
+      </p>
+      <div class="footer-tech">
+        <div class="footer-tech-dot"></div>
+        HTML · CSS · JavaScript vanilla
+      </div>
+    </div>
+
+  </div>
+</footer>
+
+</body>
+</html>
