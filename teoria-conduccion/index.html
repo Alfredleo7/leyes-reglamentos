@@ -119,6 +119,16 @@
   .breadcrumb-back:hover{color:var(--text)}
   .breadcrumb-back svg{width:14px;height:14px}
 
+  /* --- FEEDBACK INMEDIATO --- */
+  .opt.correct{border-color:var(--green);background:var(--green-bg);cursor:default}
+  .opt.correct .opt-radio{border-color:var(--green);background:var(--green)}
+  .opt.correct .opt-radio::after{content:'✓';color:#0D0F14;font-size:10px;font-weight:700;width:auto;height:auto;background:none;border-radius:0}
+  .opt.incorrect{border-color:var(--red);background:var(--red-bg);cursor:default}
+  .opt.incorrect .opt-radio{border-color:var(--red)}
+  .opt.disabled{cursor:default;pointer-events:none}
+  .q-feedback{display:none;font-size:13px;color:var(--muted);line-height:1.6;margin-top:1rem;padding:.75rem 1rem;background:rgba(255,255,255,.03);border-left:2px solid var(--accent);border-radius:4px}
+  .question-card.answered .q-feedback{display:block}
+
   @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
   @media(max-width:1024px){
     .result-quiz-layout{grid-template-columns:1fr;gap:1.5rem}
@@ -310,34 +320,46 @@ function startQuiz() {
 
 function renderAllQuestions() {
   const container = document.getElementById('questions-container');
-  container.innerHTML = QUIZ_CONFIG.questions.map((q, i) => `
-    <div class="question-card ${answers[i] !== undefined ? 'answered' : ''}" id="qcard-${i}">
-      <div class="q-meta">
-        <span class="q-num-badge">P${i+1}</span>
-        <div class="section-tag">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          ${q.section}
-        </div>
-      </div>
-      <h2 class="q-title">${q.q}</h2>
-      <div class="options">
-        ${q.opts.map((opt, j) => `
-          <div class="opt ${answers[i] === j ? 'selected' : ''}" onclick="answerQuestion(${i}, ${j})">
-            <div class="opt-radio"></div>
-            <div class="opt-text">${opt}</div>
+  container.innerHTML = QUIZ_CONFIG.questions.map((q, i) => {
+    const answered = answers[i] !== undefined;
+    const userChoice = answers[i];
+    const correctIdx = q.ans;
+    const optsHTML = q.opts.map((opt, j) => {
+      let cls = 'opt';
+      if (answered) {
+        cls += ' disabled';
+        if (j === correctIdx) cls += ' correct';
+        else if (j === userChoice) cls += ' incorrect';
+      }
+      return `<div class="${cls}" onclick="answerQuestion(${i}, ${j})"><div class="opt-radio"></div><div class="opt-text">${opt}</div></div>`;
+    }).join('');
+    return `
+      <div class="question-card ${answered ? 'answered' : ''}" id="qcard-${i}">
+        <div class="q-meta">
+          <span class="q-num-badge">P${i+1}</span>
+          <div class="section-tag">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            ${q.section}
           </div>
-        `).join('')}
-      </div>
-    </div>
-  `).join('');
+        </div>
+        <h2 class="q-title">${q.q}</h2>
+        <div class="options">${optsHTML}</div>
+        <div class="q-feedback">${q.exp}</div>
+      </div>`;
+  }).join('');
 }
 
 function answerQuestion(qIdx, optIdx) {
+  if (answers[qIdx] !== undefined) return;
   answers[qIdx] = optIdx;
+  const q = QUIZ_CONFIG.questions[qIdx];
+  const correctIdx = q.ans;
   const card = document.getElementById('qcard-' + qIdx);
   card.classList.add('answered');
   card.querySelectorAll('.opt').forEach((el, j) => {
-    el.classList.toggle('selected', j === optIdx);
+    el.classList.add('disabled');
+    if (j === correctIdx) el.classList.add('correct');
+    else if (j === optIdx) el.classList.add('incorrect');
   });
   updateProgress();
 }
